@@ -7,8 +7,8 @@
 //TODO Kompatibilita pre mesta s medzerami v mene
 Cities::Cities(const std::vector<std::string>& listOfCities) {
     for (const std::string& city : listOfCities) {
-        for (char c : city)
-            if (!isalpha(c))
+        for (char letter : city)
+            if (!isalpha(letter))
                 break;
         this->cities.insert(city);
     }
@@ -31,8 +31,8 @@ bool Cities::add(const std::string& city) {
     if (city.empty())
         return false;
 
-    for (char c : city)
-        if (!isalpha(c))
+    for (char letter : city)
+        if (!isalpha(letter))
             return false;
     cities.insert(city);
     return true;
@@ -41,12 +41,15 @@ bool Cities::add(const std::string& city) {
 /*
  * Prida zoznam miest do mnoziny, nekompatibilne ignoruje
  */
-void Cities::add(const std::vector<std::string>& listOfCities) {
+size_t Cities::add(const std::vector<std::string>& listOfCities) {
     if (listOfCities.empty())
-        return;
+        return 0;
 
+    size_t count = 0;
     for (const std::string& city : listOfCities)
-        add(city);
+        if (add(city))
+            count++;
+    return count;
 }
 
 /*
@@ -73,18 +76,17 @@ size_t Cities::size() {
 /*
  * Vrati string v tvare mesto1,mesto2,...,mestoN
  */
-const std::string Cities::print() {
+std::string Cities::getListOfCities() {
     if (isEmpty())
         return "";
 
-    std::ostringstream os;
-    std::string del = ",";
-    bool first = true;
+    std::ostringstream cityStream;
+    bool firstCity = true;
     for (const std::string& city : cities) {
-        if (!first)
-            os << del;
-        os << city;
-        first = false;
+        if (!firstCity)
+            cityStream << ",";
+        cityStream << city;
+        firstCity = false;
     }
-    return os.str();
+    return cityStream.str();
 }

@@ -73,22 +73,22 @@ TEST(Cities, Remove) {
     ASSERT_EQ(cities.size(), 3);
     cities.remove("Vienna");
     ASSERT_EQ(cities.size(), 2);
-    ASSERT_EQ(cities.print(), "Bratislava,Budapest");
+    ASSERT_EQ(cities.getListOfCities(), "Bratislava,Budapest");
 }
 
-TEST(Cities, Print) {
+TEST(Cities, List) {
     Cities cities;
-    ASSERT_EQ(cities.print(), "");
+    ASSERT_EQ(cities.getListOfCities(), "");
     cities.add("Bratislava");
-    ASSERT_EQ(cities.print(), "Bratislava");
+    ASSERT_EQ(cities.getListOfCities(), "Bratislava");
     cities.add("Budapest");
     cities.add("Vienna");
-    ASSERT_EQ(cities.print(), "Bratislava,Budapest,Vienna");
+    ASSERT_EQ(cities.getListOfCities(), "Bratislava,Budapest,Vienna");
     cities.remove("Bratislava");
     cities.remove("Budapest");
     cities.remove("Vienna");
     ASSERT_TRUE(cities.isEmpty());
-    ASSERT_EQ(cities.print(), "");
+    ASSERT_EQ(cities.getListOfCities(), "");
 }
 
 TEST(Flight, CislaLetov) {

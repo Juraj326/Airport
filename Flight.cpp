@@ -1,10 +1,11 @@
 #include "Flight.h"
+
 /*
  * nastavi cislo letu a mnozinu miest a status na vytvara sa
  */
 Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(std::move(connections)), status(FlightStatus::CREATING),
                                                                                         gateNumber(-1), runwayNumber(-1) {
-    if (number < 0 || number > 9999)
+    if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
         throw std::invalid_argument("Flight number must be an integer ranging from 0 to 9999.");
 
     this->number = number;
@@ -27,7 +28,7 @@ bool Flight::schedule() {
 bool Flight::board() {
     if (status != FlightStatus::SCHEDULING)
         return false;
-    if (gateNumber == -1)
+    if (!hasAssignedGate())
         return false;
 
     status = FlightStatus::BOARDING;
@@ -40,7 +41,7 @@ bool Flight::board() {
 bool Flight::depart() {
     if (status != FlightStatus::BOARDING)
         return false;
-    if (runwayNumber == -1)
+    if (!hasAssignedRunway())
         return false;
 
     status = FlightStatus::DEPARTING;
@@ -64,7 +65,7 @@ bool Flight::initiateArrival() {
 bool Flight::land() {
     if (status != FlightStatus::ARRIVING)
         return false;
-    if (runwayNumber == -1)
+    if (!hasAssignedRunway())
         return false;
 
     status = FlightStatus::LANDING;
@@ -77,7 +78,7 @@ bool Flight::land() {
 bool Flight::disembark() {
     if (status != FlightStatus::LANDING)
         return false;
-    if (gateNumber == -1)
+    if (!hasAssignedGate())
         return false;
 
     status = FlightStatus::DISEMBARKING;
@@ -89,7 +90,7 @@ bool Flight::disembark() {
  * V tejto mnozine musi byt teda aj Airport.city, pretoze je destinaciou pre prichadzajuce lety.
  */
 
-bool Flight::setOrigin(std::string origin) {
+bool Flight::setOrigin(const std::string &origin) {
     if (!this->origin.empty())
         return false;
     if (origin.empty())
@@ -108,7 +109,7 @@ bool Flight::setOrigin(std::string origin) {
 /*
  * Let nemoze menit destination, origin a destinacia nemozu byt rovnake a destination musi patrit do mnoziny miest, do ktorych sa lieta
  */
-bool Flight::setDestination(std::string destination) {
+bool Flight::setDestination(const std::string &destination) {
     if (!this->destination.empty())
         return false;
     if (destination.empty())
@@ -127,10 +128,9 @@ bool Flight::setDestination(std::string destination) {
 /*
  * Gate sa moze pridelovat az potom ako bol let naplanovany alebo let uz pristal.
  */
+//TODO Kontrola gate/runway number sa musi vykonavat v airport.cpp. Asi by bolo dobre nejako upravit.
 bool Flight::assignGate(int gateNumber) {
     if (status != FlightStatus::SCHEDULING && status != FlightStatus::LANDING)
-        return false;
-    if (gateNumber < 0)
         return false;
 
     this->gateNumber = gateNumber;
@@ -142,8 +142,6 @@ bool Flight::assignGate(int gateNumber) {
  */
 bool Flight::assignRunway(int runwayNumber) {
     if (status != FlightStatus::BOARDING && status != FlightStatus::ARRIVING)
-        return false;
-    if (runwayNumber < 0)
         return false;
 
     this->runwayNumber = runwayNumber;

@@ -4,6 +4,9 @@
 
 #pragma once
 
+const int MIN_INFRASTRUCTURE_NUMBER = 0;
+const int MAX_INFRASTRUCTURE_NUMBER = 36;
+
 enum class Status {
     OCCUPIED, VACANT
 };
@@ -16,7 +19,7 @@ protected:
 protected:
     Infrastructure() = delete;
     Infrastructure(int number) : flight(nullptr), status(Status::VACANT) {
-        if (number < 0 || number > 36)
+        if (number < MIN_INFRASTRUCTURE_NUMBER || number > MAX_INFRASTRUCTURE_NUMBER)
             throw std::invalid_argument("Gate/Runway number must be an integer ranging from 0 to 36.");
 
         this->number = number;
