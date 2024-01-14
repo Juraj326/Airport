@@ -1,8 +1,5 @@
 #include "Gate.h"
 
-/*
- * Pridelenie letu gate-u.
- */
 bool Gate::assignFlight(std::shared_ptr<Flight> flight) {
     if (status == Status::OCCUPIED || flight == nullptr)
         return false;
@@ -13,10 +10,6 @@ bool Gate::assignFlight(std::shared_ptr<Flight> flight) {
     return true;
 }
 
-
-/*
- * Uvolnenie letu z Gate-u.
- */
 void Gate::releaseFlight() {
     flight->unassignGate();
     flight = nullptr;

@@ -21,13 +21,13 @@ enum class FlightStatus {
 
 
 class Flight {
-    int number; // cislo letu
-    FlightStatus status;    // stav letu
-    std::string origin; // povod letu
-    std::string destination;    // destinacia letu
-    int gateNumber; // cislo prideleneho gate-u, -1 ak nema
-    int runwayNumber;   // cislo pridelenej runway-e, -1 ak nema
-    std::shared_ptr<Cities> connections;    // mnozina miest kam moze letiet
+    int number;
+    FlightStatus status;
+    std::string origin;
+    std::string destination;
+    int gateNumber;
+    int runwayNumber;
+    std::shared_ptr<Cities> connections;
 public:
     Flight() = delete;
     Flight(int number, std::shared_ptr<Cities> connections);

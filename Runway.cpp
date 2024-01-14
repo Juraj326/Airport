@@ -1,8 +1,5 @@
 #include "Runway.h"
 
-/*
- * Pridelenie letu runway.
- */
 bool Runway::assignFlight(std::shared_ptr<Flight> flight) {
     if (status == Status::OCCUPIED || flight == nullptr)
         return false;
@@ -13,9 +10,6 @@ bool Runway::assignFlight(std::shared_ptr<Flight> flight) {
     return true;
 }
 
-/*
- * Uvolnenie runway-e.
- */
 void Runway::releaseFlight() {
     flight->unassignRunway();
     flight = nullptr;

@@ -6,7 +6,7 @@
 #pragma once
 
 class Cities {
-    std::set<std::string> cities;   // mnozina miest (origin a destinacie)
+    std::set<std::string> cities;
 public:
     Cities() {};
     Cities(const std::vector<std::string> &listOfCities);
@@ -17,5 +17,5 @@ public:
     void remove(const std::string &city);
     bool isEmpty();
     size_t size();
-    std::string getListOfCities();
+    const std::string getListOfCities();
 };

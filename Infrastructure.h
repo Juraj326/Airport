@@ -14,8 +14,8 @@ enum class Status {
 class Infrastructure {
 protected:
     int number;
-    std::shared_ptr<Flight> flight; // let, ktory bude pouzivat danu infrastrukturu
-    Status status;  // status infrastruktury
+    std::shared_ptr<Flight> flight;
+    Status status;
 protected:
     Infrastructure() = delete;
     Infrastructure(int number) : flight(nullptr), status(Status::VACANT) {
