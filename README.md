@@ -97,8 +97,8 @@ Na základe spätnej väzby z malej verzie projektu som
 Definície všetkých konštánt som uviedol na jedno miesto spolu s ich názvami.
 
 ```c++
-# PRED
-# Flight.cpp
+// PRED
+// Flight.cpp
 
 Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(std::move(connections)), status(FlightStatus::CREATING), gateNumber(-1), runwayNumber(-1) {
     if (number < 0 || number > 9999)
@@ -108,14 +108,14 @@ Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(st
 ```
 
 ```c++
-# PO
-# Flight.h
+// PO
+// Flight.h
 
 const int MIN_FLIGHT_NUMBER = 0;
 const int MAX_FLIGHT_NUMBER = 9999;
 
 
-# Flight.cpp
+// Flight.cpp
 
 Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(std::move(connections)), status(FlightStatus::CREATING), gateNumber(-1), runwayNumber(-1) {
     if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
@@ -129,8 +129,8 @@ Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(st
 Rovnaké zmeny som implementoval aj do abstraktnej triedy Infrastructure.
 
 ```c++
-# PRED
-# Infrastructure.h
+// PRED
+// Infrastructure.h
 
 Infrastructure(int number) : flight(nullptr), status(Status::VACANT) {
     if (number < 0 || number > 36)
@@ -140,8 +140,8 @@ Infrastructure(int number) : flight(nullptr), status(Status::VACANT) {
 ```
 
 ```c++
-# PO
-# Infrastructure.h
+// PO
+// Infrastructure.h
 
 const int MIN_INFRASTRUCTURE_NUMBER = 0;
 const int MAX_INFRASTRUCTURE_NUMBER = 36;
@@ -161,16 +161,16 @@ V triede Flight som zmenil metódy `bool Flight::setOrigin(std::string origin)` 
 `bool Flight::setDestination(std::string destination)`, aby brali parametre referenciou.
 
 ```c++
-# PRED
-# Flight.h
+// PRED
+// Flight.h
 
 bool setOrigin(std::string origin);
 bool setDestination(std::string destination);
 ```
 
 ```c++
-# PO
-# Flight.h
+// PO
+// Flight.h
 
 bool setOrigin(const std::string &origin);
 bool setDestination(const std::string &destination);
@@ -184,16 +184,16 @@ V triede Flight som zmenil gettery `std::string getOrigin()` a `std::string getD
 `std::string` referenciou.
 
 ```c++
-# PRED
-# Flight.h
+// PRED
+// Flight.h
 
 std::string getOrigin() const { return origin; };
 std::string getDestination() const { return destination; };
 ```
 
 ```c++
-# PO
-# Flight.h
+// PO
+// Flight.h
 
 const std::string &getOrigin() const { return origin; };
 const std::string &getDestination() const { return destination; };
@@ -207,8 +207,8 @@ V konštruktore `Cities::Cities(const std::vector<std::string>& listOfCities)` a
 `Cities::add(const std::string& city)` som zvolil vhodnejší názov premennej.
 
 ```c++
-# PRED
-# Cities.cpp
+// PRED
+// Cities.cpp
 
 Cities::Cities(const std::vector<std::string>& listOfCities) {
     ...
@@ -226,8 +226,8 @@ Cities::add(const std::string& city) {
 ```
 
 ```c++
-# PO
-# Cities.cpp
+// PO
+// Cities.cpp
 
 Cities::Cities(const std::vector<std::string>& listOfCities) {
     ...
@@ -248,8 +248,8 @@ Metódu `const std::string Cities::print()` som premenoval na `const std::string
 aby mala výstižnejší názov a taktiež som zmenil názvy viacerým premenným v tejto metóde.
 
 ```c++
-# PRED
-# Cities.cpp
+// PRED
+// Cities.cpp
 
 const std::string Cities::print() {
     ...
@@ -261,8 +261,8 @@ const std::string Cities::print() {
 ```
 
 ```c++
-# PO
-# Cities.cpp
+// PO
+// Cities.cpp
 
 const std::string Cities::getListOfCities() {
     ...
