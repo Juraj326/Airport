@@ -23,7 +23,7 @@ letových spojení.
 Jej jediným atribútom je `std::set<std::string> cities`, ktorý obsahuje zmienené mestá, ktoré sú
 spojené s letiskom.  
 Ďalej obsahuje základné metódy na prácu s množinou a metódy na poskytovanie informácii
-o tejto množine. Bližšia dokumentácia k týmto metódam sa nachádza pri ich implementáciách.  
+o tejto množine. Bližšia dokumentácia k týmto metódam sa nachádza pri ich definíciách.  
 Trieda Cities poskytuje defaultny konštruktor a konštruktor `Cities(const std::vector<std::string> &listOfCities)`,
 ktorý naplní množinu mestami zo zoznamu.
 
@@ -42,7 +42,7 @@ lete a simuláciu letu. Trieda Flight má preto sedem atribútov
 
 Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool schedule()` až `bool disembark()`)
 a klasické metódy pre OOP ako sú gettery a settery. Všetká dokumentácia k týmto metódam sa potom nachádza pri ich
-implementácii.  
+definíciách.  
 Trieda Flight poskytuje jediný konštruktor `Flight(int number, std::shared_ptr<Cities> connections)`.
 
 ### Infrastructure
@@ -56,7 +56,7 @@ Gate a Runway. Táto trieda má tri atribúty
 
 Ďalej sú v tejto triede dve čisto virtuálne metódy `virtual bool assignFlight(std::shared_ptr<Flight> flight)` a
 `virtual void releaseFlight()`, ktoré sú následne prekryté v triedach Gate a Runway. Okrem týchto dvoch metód sú v
-triede ďalšie dve metódy, ktorých dokumentácia sa nachádza pri ich implementácii.  
+triede ďalšie dve metódy, ktorých dokumentácia sa nachádza pri ich definíciách.  
 Trieda Infrastructure poskytuje jediný konštruktor `Infrastructure(int number) : flight(nullptr), status(Status::VACANT)`.
 
 ### Gate

@@ -29,7 +29,6 @@ class Flight {
     int runwayNumber;
     std::shared_ptr<Cities> connections;
 public:
-    Flight() = delete;
     Flight(int number, std::shared_ptr<Cities> connections);
 
     bool schedule();
