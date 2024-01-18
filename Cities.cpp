@@ -1,8 +1,8 @@
 #include "Cities.h"
 
 /**
- * Konštruktor, ktorý vytvorí množinu spojení zo zoznamu.
- * @param listOfCities Vector miest, z ktorých má vytvoriť množinu spojení.
+ * Konštruktor, ktorý vytvorí množinu miest zo zoznamu.
+ * @param listOfCities Vector miest, z ktorých má vytvoriť množinu miest.
  */
 Cities::Cities(const std::vector<std::string>& listOfCities) {
     for (const std::string& city : listOfCities) {
@@ -33,7 +33,7 @@ bool Cities::isValid(const std::string &city) {
 }
 
 /**
- * Metóda, ktorá pridá mesto do možiny spojení.
+ * Metóda, ktorá pridá mesto do možiny miest.
  * @param city Mesto, ktoré sa má pridať.
  * @return True ak mesto je správneho formátu.
  */
@@ -48,7 +48,7 @@ bool Cities::add(const std::string& city) {
 }
 
 /**
- * Metóda, ktorá pridá mestá do množiny spojení.
+ * Metóda, ktorá pridá mestá do množiny miest.
  * @param listOfCities Vector miest, ktoré sa majú pridať.
  * @return Počet pridaných miest.
  */
@@ -64,7 +64,7 @@ size_t Cities::add(const std::vector<std::string>& listOfCities) {
 }
 
 /**
- * Metóda, ktorá odstráni mesto z množiny spojení.
+ * Metóda, ktorá odstráni mesto z množiny miest.
  * @param city Mesto, ktoré sa má odstrániť.
  */
 void Cities::remove(const std::string& city) {
@@ -75,9 +75,9 @@ void Cities::remove(const std::string& city) {
 }
 
 /**
- * Metóda, ktorá overuje, či mesto patrí do množiny spojení.
+ * Metóda, ktorá overuje, či mesto patrí do množiny miest.
  * @param city Mesto na overenie.
- * @return True ak množina spojení obsahuje city.
+ * @return True ak množina miest obsahuje city.
  */
 bool Cities::contains(const std::string& city) {
     if (isEmpty())
@@ -87,24 +87,24 @@ bool Cities::contains(const std::string& city) {
 }
 
 /**
- * Metóda, ktorá overuje, či je množina spojení prázdna.
- * @return True ak je množina spojení prázdna.
+ * Metóda, ktorá overuje, či je množina miest prázdna.
+ * @return True ak je množina miest prázdna.
  */
 bool Cities::isEmpty() {
     return cities.empty();
 }
 
 /**
- * Metóda, ktorá vracia veľkosť množiny spojení.
- * @return Veľkosť množiny spojení.
+ * Metóda, ktorá vracia veľkosť množiny miest.
+ * @return Veľkosť množiny miest.
  */
 size_t Cities::size() {
     return cities.size();
 }
 
 /**
- * Metóda, ktorá vypíše všetky mestá z množiny spojení.
- * @return Obsah množiny spojení v tvare "Mesto1,Mesto2,...".
+ * Metóda, ktorá vypíše všetky mestá z množiny miest.
+ * @return Obsah množiny miest v tvare "Mesto1,Mesto2,...".
  */
 const std::string Cities::getListOfCities() {
     if (isEmpty())
