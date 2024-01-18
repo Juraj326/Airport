@@ -7,6 +7,8 @@
 
 class Cities {
     std::set<std::string> cities;
+
+    bool isValid(const std::string &city);
 public:
     Cities() {};
     Cities(const std::vector<std::string> &listOfCities);

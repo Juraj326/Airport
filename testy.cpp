@@ -41,12 +41,16 @@ TEST(Cities, Add) {
     ASSERT_TRUE(city.add("Bratislava"));
     ASSERT_FALSE(city.isEmpty());
     ASSERT_TRUE(city.contains("Bratislava"));
+    ASSERT_TRUE(city.add("New York"));
+    ASSERT_FALSE(city.add(" New York"));
+    ASSERT_FALSE(city.add("New  York"));
 
-    std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Prague", "Budapest", "London"};
+
+    std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Prague", "Budapest", "London", "New York", " S hanghai"};
     Cities cities;
     cities.add(listOfCities);
     ASSERT_FALSE(cities.isEmpty());
-    ASSERT_EQ(cities.size(), 5);
+    ASSERT_EQ(cities.size(), 6);
 }
 
 TEST(Cities, SekvenciaAddov) {
