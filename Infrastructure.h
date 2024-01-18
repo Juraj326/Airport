@@ -22,7 +22,7 @@ protected:
      * Konštruktor, ktorý vytvorí voľnú infraštruktúru.
      * @param number Identifikačné číslo.
      */
-    Infrastructure(int number) : flight(nullptr), status(Status::VACANT) {
+    explicit Infrastructure(int number) : flight(nullptr), status(Status::VACANT) {
         if (number < MIN_INFRASTRUCTURE_NUMBER || number > MAX_INFRASTRUCTURE_NUMBER)
             throw std::invalid_argument("Gate/Runway number must be an integer ranging from 0 to 36.");
 

@@ -4,7 +4,7 @@
 
 class Gate : public Infrastructure {
 public:
-    Gate(int number) : Infrastructure(number) {}
+    explicit Gate(int number) : Infrastructure(number) {}
 
     bool assignFlight(std::shared_ptr<Flight> flight) override;
     void releaseFlight() override;

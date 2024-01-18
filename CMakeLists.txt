@@ -12,7 +12,6 @@ set(SOURCE_FILES
         Runway.cpp
         Gate.cpp
         Airport.cpp
-        FileManager.cpp
 
         testy.cpp
 

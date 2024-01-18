@@ -11,18 +11,6 @@ Cities::Cities(const std::vector<std::string>& listOfCities) {
 }
 
 /**
- * Metóda, ktorá overuje, či mesto patrí do množiny spojení.
- * @param city Mesto na overenie.
- * @return True ak množina spojení obsahuje city.
- */
-bool Cities::contains(const std::string& city) {
-    if (isEmpty())
-        return false;
-
-    return cities.find(city) != cities.end();
-}
-
-/**
  * Metóda, ktorá overuje, či je mesto platné.
  * @param city Mesto na overenie.
  * @return True ak sa mesto skladá iba z písmen a medzier.
@@ -84,6 +72,18 @@ void Cities::remove(const std::string& city) {
         return;
 
     cities.erase(city);
+}
+
+/**
+ * Metóda, ktorá overuje, či mesto patrí do množiny spojení.
+ * @param city Mesto na overenie.
+ * @return True ak množina spojení obsahuje city.
+ */
+bool Cities::contains(const std::string& city) {
+    if (isEmpty())
+        return false;
+
+    return cities.find(city) != cities.end();
 }
 
 /**

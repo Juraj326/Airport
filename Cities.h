@@ -10,13 +10,14 @@ class Cities {
 
     bool isValid(const std::string &city);
 public:
-    Cities() {};
-    Cities(const std::vector<std::string> &listOfCities);
+    Cities() = default;;
+    explicit Cities(const std::vector<std::string> &listOfCities);
 
-    bool contains(const std::string &city);
     bool add(const std::string &city);
     size_t add(const std::vector<std::string> &listOfCities);
     void remove(const std::string &city);
+
+    bool contains(const std::string &city);
     bool isEmpty();
     size_t size();
     const std::string getListOfCities();
