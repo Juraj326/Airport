@@ -79,7 +79,7 @@ void Cities::remove(const std::string& city) {
  * @param city Mesto na overenie.
  * @return True ak množina miest obsahuje city.
  */
-bool Cities::contains(const std::string& city) {
+bool Cities::contains(const std::string& city) const {
     if (isEmpty())
         return false;
 
@@ -90,7 +90,7 @@ bool Cities::contains(const std::string& city) {
  * Metóda, ktorá overuje, či je množina miest prázdna.
  * @return True ak je množina miest prázdna.
  */
-bool Cities::isEmpty() {
+bool Cities::isEmpty() const {
     return cities.empty();
 }
 
@@ -98,7 +98,7 @@ bool Cities::isEmpty() {
  * Metóda, ktorá vracia veľkosť množiny miest.
  * @return Veľkosť množiny miest.
  */
-size_t Cities::size() {
+size_t Cities::size() const {
     return cities.size();
 }
 
@@ -106,7 +106,7 @@ size_t Cities::size() {
  * Metóda, ktorá vypíše všetky mestá z množiny miest.
  * @return Obsah množiny miest v tvare "Mesto1,Mesto2,...".
  */
-const std::string Cities::getListOfCities() {
+std::string Cities::getListOfCities() const {
     if (isEmpty())
         return "";
 

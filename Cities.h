@@ -17,8 +17,8 @@ public:
     size_t add(const std::vector<std::string> &listOfCities);
     void remove(const std::string &city);
 
-    bool contains(const std::string &city);
-    bool isEmpty();
-    size_t size();
-    const std::string getListOfCities();
+    bool contains(const std::string &city) const;
+    bool isEmpty() const;
+    size_t size() const;
+    std::string getListOfCities() const;
 };

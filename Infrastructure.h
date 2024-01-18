@@ -29,10 +29,10 @@ protected:
         this->number = number;
     };
 public:
-    virtual int getNumber() { return number; };
+    virtual int getNumber() const { return number; };
     virtual bool assignFlight(std::shared_ptr<Flight> flight) = 0;
     virtual void releaseFlight() = 0;
-    virtual bool isVacant() { return status == Status::VACANT; };
+    virtual bool isVacant() const { return status == Status::VACANT; };
 
     virtual ~Infrastructure() = default;
 };
