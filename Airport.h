@@ -29,7 +29,7 @@ class Airport {
 public:
     Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways);
 
-    int manageTraffic();
+    void manageTraffic();
 
     size_t loadFlightsFromFile(const std::string &fileName);
     bool saveFlightsToFile(const std::string &fileName);

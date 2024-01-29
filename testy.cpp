@@ -126,7 +126,7 @@ TEST(Flight, OdchadzajuciLet) {
     ASSERT_TRUE(flight.setDestination("Vienna"));
     ASSERT_TRUE(flight.schedule());
     ASSERT_TRUE(flight.board());
-    ASSERT_TRUE(flight.depart());
+    ASSERT_TRUE(flight.take_off());
     ASSERT_EQ(flight.getFlightStatus(), FlightStatus::DEPARTING);
 }
 
@@ -171,11 +171,11 @@ TEST(Flight, Sekvencia) {
     ASSERT_TRUE(flight.schedule());
     ASSERT_EQ(flight.getFlightStatus(), FlightStatus::BOARDING);
     ASSERT_FALSE(flight.initiateArrival());
-    ASSERT_FALSE(flight.depart());
+    ASSERT_FALSE(flight.take_off());
     ASSERT_FALSE(flight.land());
     ASSERT_TRUE(flight.board());
     ASSERT_EQ(flight.getFlightStatus(), FlightStatus::TAKING_OFF);
-    ASSERT_TRUE(flight.depart());
+    ASSERT_TRUE(flight.take_off());
 
     ASSERT_EQ(flight.getOrigin(), "Bratislava");
     ASSERT_EQ(flight.getDestination(), "Prague");
@@ -183,21 +183,21 @@ TEST(Flight, Sekvencia) {
 }
 
 TEST(Flight, StatusString) {
-    Flight flight0(0);
-    Flight flight1(1, FlightStatus::BOARDING);
-    Flight flight2(2, FlightStatus::TAKING_OFF);
-    Flight flight3(3, FlightStatus::DEPARTING);
-    Flight flight4(4, FlightStatus::ARRIVING);
-    Flight flight5(5, FlightStatus::LANDING);
-    Flight flight6(6, FlightStatus::DISEMBARKING);
+    ASSERT_EQ(flightStatusToString(FlightStatus::SCHEDULING), "Scheduling");
+    ASSERT_EQ(flightStatusToString(FlightStatus::BOARDING), "Boarding");
+    ASSERT_EQ(flightStatusToString(FlightStatus::TAKING_OFF), "Taking off");
+    ASSERT_EQ(flightStatusToString(FlightStatus::DEPARTING), "Departing");
+    ASSERT_EQ(flightStatusToString(FlightStatus::ARRIVING), "Arriving");
+    ASSERT_EQ(flightStatusToString(FlightStatus::LANDING), "Landing");
+    ASSERT_EQ(flightStatusToString(FlightStatus::DISEMBARKING), "Disembarking");
 
-    ASSERT_EQ(flight0.getFlightStatusString(), "Scheduling");
-    ASSERT_EQ(flight1.getFlightStatusString(), "Boarding");
-    ASSERT_EQ(flight2.getFlightStatusString(), "Taking off");
-    ASSERT_EQ(flight3.getFlightStatusString(), "Departing");
-    ASSERT_EQ(flight4.getFlightStatusString(), "Arriving");
-    ASSERT_EQ(flight5.getFlightStatusString(), "Landing");
-    ASSERT_EQ(flight6.getFlightStatusString(), "Disembarking");
+    ASSERT_EQ(stringToFlightStatus("Scheduling"), FlightStatus::SCHEDULING);
+    ASSERT_EQ(stringToFlightStatus("Boarding"), FlightStatus::BOARDING);
+    ASSERT_EQ(stringToFlightStatus("Taking off"), FlightStatus::TAKING_OFF);
+    ASSERT_EQ(stringToFlightStatus("Departing"), FlightStatus::DEPARTING);
+    ASSERT_EQ(stringToFlightStatus("Arriving"), FlightStatus::ARRIVING);
+    ASSERT_EQ(stringToFlightStatus("Landing"), FlightStatus::LANDING);
+    ASSERT_EQ(stringToFlightStatus("Disembarking"), FlightStatus::DISEMBARKING);
 }
 
 TEST(Flight, PorovnaniePrichadzajucich) {

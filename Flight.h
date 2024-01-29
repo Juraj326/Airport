@@ -1,6 +1,7 @@
 #include "Cities.h"
 
 #include <string>
+#include <map>
 #include <memory>
 #include <stdexcept>
 
@@ -22,18 +23,21 @@ enum class FlightStatus {
     LANDING // let je pripravený pristáť, najvyššia priorita
 };
 
+FlightStatus stringToFlightStatus(const std::string &status);
+std::string flightStatusToString(FlightStatus status);
 
 class Flight {
     int number;
     FlightStatus status;
     std::string origin;
     std::string destination;
+
 public:
     explicit Flight(int number, FlightStatus status = FlightStatus::SCHEDULING);
 
     bool schedule();
     bool board();
-    bool depart();
+    bool take_off();
     bool initiateArrival();
     bool land();
     bool disembark();
@@ -43,7 +47,6 @@ public:
 
     int getFlightNumber() const { return number; };
     FlightStatus getFlightStatus() const { return status; };
-    std::string getFlightStatusString() const;
     const std::string &getOrigin() const { return origin; };
     const std::string &getDestination() const { return destination; };
 

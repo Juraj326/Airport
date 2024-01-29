@@ -14,7 +14,7 @@ Flight::Flight(int number, FlightStatus status) :  status(status) {
 
 /**
  * Metóda, ktorá simuluje plánovanie letu.
- * @return True ak má let priradený pôvod a destináciu.
+ * @return True ak bol let vo fáze SCHEDULING a letu bol priradený pôvod a destinácia.
  */
 bool Flight::schedule() {
     if (status != FlightStatus::SCHEDULING || origin.empty() || destination.empty())
@@ -26,7 +26,7 @@ bool Flight::schedule() {
 
 /**
  * Metóda, ktorá simuluje boardovanie letu.
- * @return True ak je let naplánovaný a bol mu priradený gate.
+ * @return True ak bol let vo fáze BOARDING.
  */
 bool Flight::board() {
     if (status != FlightStatus::BOARDING)
@@ -38,9 +38,9 @@ bool Flight::board() {
 
 /**
  * Metóda, ktorá simuluje odlet letu.
- * @return True ak je let vo fáze boardovania a bola mu priradená runway.
+ * @return True ak bol let vo fáze BOARDING.
  */
-bool Flight::depart() {
+bool Flight::take_off() {
     if (status != FlightStatus::TAKING_OFF)
         return false;
 
@@ -50,7 +50,7 @@ bool Flight::depart() {
 
 /**
  * Metóda, ktorá simuluje oznam o prílete letu.
- * @return True ak let má destináciu a pôvod.
+ * @return True ak bol let vo fáze SCHEDULING a letu bol priradený pôvod a destinácia.
  */
 bool Flight::initiateArrival() {
     if (status != FlightStatus::SCHEDULING || destination.empty() || origin.empty())
@@ -62,7 +62,7 @@ bool Flight::initiateArrival() {
 
 /**
  * Metóda, ktorá simuluje pristátie letu.
- * @return True ak let prichádza a má priradenú runway.
+ * @return True ak bol let vo fáze ARRIVING.
  */
 bool Flight::land() {
     if (status != FlightStatus::ARRIVING)
@@ -74,7 +74,7 @@ bool Flight::land() {
 
 /**
  * Metóda, ktorá simuluje koniec letu.
- * @return True ak let pristál a má priradený gate.
+ * @return True ak bol let vo fáze LANDING.
  */
 bool Flight::disembark() {
     if (status != FlightStatus::LANDING)
@@ -111,10 +111,20 @@ bool Flight::setDestination(const std::string &destination) {
 }
 
 /**
+ * Porovnávanie podľa priority fázy letu. Priorita je podľa poradia definície fáz letu.
+ * @param flight2 Let, s ktorým sa porovnáva priorita.
+ * @return True ak má flight (this) nižšiu prioritu ako flight2.
+ */
+bool Flight::operator<(const Flight &flight2) const {
+    return status < flight2.status;
+}
+
+/**
  * Metóda, ktorá vracia stringovú reprezentáciu fázy letu.
+ * @param status Fáza letu.
  * @return Stringová reprezentácia fázy letu.
  */
-std::string Flight::getFlightStatusString() const {
+std::string flightStatusToString(FlightStatus status) {
     switch (status) {
         case FlightStatus::BOARDING:
             return "Boarding";
@@ -134,10 +144,26 @@ std::string Flight::getFlightStatusString() const {
 }
 
 /**
- * Porovnávanie podľa priority fázy letu. Priorita je podľa poradia definície fáz letu.
- * @param flight2 Let, s ktorým sa porovnáva priorita.
- * @return True ak má flight (this) nižšiu prioritu ako flight2.
+ * Metóda, ktorá vracia stringovú reprezentáciu fázy letu ako enumerátor.
+ * @param status Fáza letu.
+ * @return Enumerátor.
  */
-bool Flight::operator<(const Flight &flight2) const {
-    return status < flight2.status;
+FlightStatus stringToFlightStatus(const std::string &status) {
+    std::map<std::string, FlightStatus> flightStates = {
+            {"Scheduling", FlightStatus::SCHEDULING},
+            {"Boarding", FlightStatus::BOARDING},
+            {"Taking off", FlightStatus::TAKING_OFF},
+            {"Departing", FlightStatus::DEPARTING},
+            {"Arriving", FlightStatus::ARRIVING},
+            {"Landing", FlightStatus::LANDING},
+            {"Disembarking", FlightStatus::DISEMBARKING}
+    };
+
+    auto flightStatus = flightStates.find(status);
+    if (flightStatus == flightStates.end()) {
+        std::ostringstream errorMsg;
+        errorMsg << status << " is not a valid flight status.";
+        throw std::invalid_argument(errorMsg.str());
+    }
+    return flightStatus->second;
 }

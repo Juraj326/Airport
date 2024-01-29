@@ -17,12 +17,10 @@ Airport::Airport(const std::string &city, size_t maximumNumberOfGates, size_t ma
  * 2. Počet prichádzajúcich letov a počet odchádzajúcich letov
  * 3. Pristávajúce lety majú vyššiu prioritu ako odlietajúce.
  * 4. Poradie letov podľa priority.
- * @return
  */
-int Airport::manageTraffic() {
+void Airport::manageTraffic() {
     if (100 * countVacantGates() / getNumberOfGates() < 20)
-        return 0;
-    return 0;
+        return;
 }
 
 /**
@@ -31,8 +29,6 @@ int Airport::manageTraffic() {
  * @param status Fáza, v ktorej sa let nachádza.
  * @param origin Pôvod letu.
  * @param destination Destinácia letu.
- * @param gateNumber Gate, ktorý je priradený letu.
- * @param runwayNumber Runway, ktorá je priradená letu.
  */
 void Airport::addFlight(int number, FlightStatus status, const std::string &origin, const std::string &destination) {
     if (countVacantGates() == 0 && isDeparting(status)) {
@@ -58,6 +54,7 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
        errorMsg << "Unable to set origin for flight " << number << ". Origin " << origin << " isn't a connection to this airport.";
        throw std::invalid_argument(errorMsg.str());
    }
+
    if (!connections->contains(destination)) {
        std::ostringstream errorMsg;
        errorMsg << "Unable to set destination for flight " << number << ". Destination " << destination << " isn't a connection to this airport.";
@@ -65,6 +62,7 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
    }
 
     std::shared_ptr<Flight> newFlight = std::make_shared<Flight>(number, status);
+
     if (!newFlight->setOrigin(origin)) {
         std::ostringstream errorMsg;
         errorMsg << "Unable to set origin for flight " << number << ".";
@@ -94,6 +92,7 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
     if (!inputFile.is_open())
         return 0;
 
+
     std::string line;
     size_t count = 0;
     while (std::getline(inputFile, line)) {
@@ -108,25 +107,8 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
         std::getline(flightStream, origin, ';');
         std::getline(flightStream, destination, '\n');
 
-        std::map<std::string, FlightStatus> flightStates = {
-                {"Scheduling", FlightStatus::SCHEDULING},
-                {"Boarding", FlightStatus::BOARDING},
-                {"Taking off", FlightStatus::TAKING_OFF},
-                {"Departing", FlightStatus::DEPARTING},
-                {"Arriving", FlightStatus::ARRIVING},
-                {"Landing", FlightStatus::LANDING},
-                {"Disembarking", FlightStatus::DISEMBARKING}
-        };
-
-        auto flightStatus = flightStates.find(status);
-        if (flightStatus == flightStates.end()) {
-            std::ostringstream errorMsg;
-            errorMsg << "Unable to load status for flight " << number << " from file " << fileName << ".";
-            throw std::invalid_argument(errorMsg.str());
-        }
-
         try {
-            addFlight(std::stoi(number), flightStatus->second, origin, destination);
+            addFlight(std::stoi(number), stringToFlightStatus(status), origin, destination);
         } catch (const std::invalid_argument &e) {
             std::ostringstream errorMsg;
             errorMsg << "Unable to load flight " << number << " from file " << fileName << ".";
@@ -156,7 +138,7 @@ bool Airport::saveFlightsToFile(const std::string &fileName) {
 
     for (const std::shared_ptr<Flight> &flight : flights) {
         outputFile << flight->getFlightNumber() << ";";
-        outputFile << flight->getFlightStatusString() << ";";
+        outputFile << flightStatusToString(flight->getFlightStatus()) << ";";
         outputFile << flight->getOrigin() << ";";
         outputFile << flight->getDestination() << "\n";
     }
