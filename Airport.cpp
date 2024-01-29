@@ -48,6 +48,18 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
         throw std::invalid_argument(errorMsg.str());
     }
 
+    if (isArriving(status) && origin == city) {
+        std::ostringstream errorMsg;
+        errorMsg << "Invalid status, origin for flight " << number << ".";
+        throw std::invalid_argument(errorMsg.str());
+    }
+
+    if (isDeparting(status) && destination == city) {
+        std::ostringstream errorMsg;
+        errorMsg << "Invalid status, destination for flight " << number << ".";
+        throw std::invalid_argument(errorMsg.str());
+    }
+
     if (origin != city && destination != city) {
         std::ostringstream errorMsg;
         errorMsg << "Flight " << number << " doesn't interact with this airport.";
