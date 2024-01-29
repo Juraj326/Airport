@@ -3,10 +3,9 @@
 /**
  * Konštruktor, ktorý vytvorí let na plánovanie.
  * @param number Číslo letu.
- * @param connections Množina leteckých spojení.
+ * @param status Fáza letu.
  */
-Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(std::move(connections)), status(FlightStatus::CREATING),
-                                                                                        gateNumber(-1), runwayNumber(-1) {
+Flight::Flight(int number, FlightStatus status) :  status(status), gateNumber(UNASSIGNED), runwayNumber(UNASSIGNED) {
     if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
         throw std::invalid_argument("Flight number must be an integer ranging from 0 to 9999.");
 
@@ -18,10 +17,10 @@ Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(st
  * @return True ak má let priradený pôvod a destináciu.
  */
 bool Flight::schedule() {
-    if (status != FlightStatus::CREATING || origin.empty() || destination.empty())
+    if (status != FlightStatus::SCHEDULING || origin.empty() || destination.empty())
         return false;
 
-    status = FlightStatus::SCHEDULING;
+    status = FlightStatus::BOARDING;
     return true;
 }
 
@@ -30,12 +29,10 @@ bool Flight::schedule() {
  * @return True ak je let naplánovaný a bol mu priradený gate.
  */
 bool Flight::board() {
-    if (status != FlightStatus::SCHEDULING)
-        return false;
-    if (!hasAssignedGate())
+    if (status != FlightStatus::BOARDING || !hasAssignedGate())
         return false;
 
-    status = FlightStatus::BOARDING;
+    status = FlightStatus::TAKING_OFF;
     return true;
 }
 
@@ -44,9 +41,7 @@ bool Flight::board() {
  * @return True ak je let vo fáze boardovania a bola mu priradená runway.
  */
 bool Flight::depart() {
-    if (status != FlightStatus::BOARDING)
-        return false;
-    if (!hasAssignedRunway())
+    if (status != FlightStatus::TAKING_OFF || !hasAssignedRunway())
         return false;
 
     status = FlightStatus::DEPARTING;
@@ -58,7 +53,7 @@ bool Flight::depart() {
  * @return True ak let má destináciu a pôvod.
  */
 bool Flight::initiateArrival() {
-    if (status != FlightStatus::CREATING || destination.empty() || origin.empty())
+    if (status != FlightStatus::SCHEDULING || destination.empty() || origin.empty())
         return false;
 
     status = FlightStatus::ARRIVING;
@@ -70,9 +65,7 @@ bool Flight::initiateArrival() {
  * @return True ak let prichádza a má priradenú runway.
  */
 bool Flight::land() {
-    if (status != FlightStatus::ARRIVING)
-        return false;
-    if (!hasAssignedRunway())
+    if (status != FlightStatus::ARRIVING || !hasAssignedRunway())
         return false;
 
     status = FlightStatus::LANDING;
@@ -84,9 +77,7 @@ bool Flight::land() {
  * @return True ak let pristál a má priradený gate.
  */
 bool Flight::disembark() {
-    if (status != FlightStatus::LANDING)
-        return false;
-    if (!hasAssignedGate())
+    if (status != FlightStatus::LANDING || !hasAssignedGate())
         return false;
 
     status = FlightStatus::DISEMBARKING;
@@ -99,15 +90,7 @@ bool Flight::disembark() {
  * @return True ak je mesto platné.
  */
 bool Flight::setOrigin(const std::string &origin) {
-    if (!this->origin.empty())
-        return false;
-    if (origin.empty())
-        return false;
-    if (connections->isEmpty())
-        return false;
-    if (origin == destination)
-        return false;
-    if (!connections->contains(origin))
+    if (!this->origin.empty() || origin.empty() || origin == destination)
         return false;
 
     this->origin = origin;
@@ -120,15 +103,7 @@ bool Flight::setOrigin(const std::string &origin) {
  * @return True ak je mesto platné.
  */
 bool Flight::setDestination(const std::string &destination) {
-    if (!this->destination.empty())
-        return false;
-    if (destination.empty())
-        return false;
-    if (connections->isEmpty())
-        return false;
-    if (destination == origin)
-        return false;
-    if (!connections->contains(destination))
+    if (!this->destination.empty() || destination.empty() || destination == origin)
         return false;
 
     this->destination = destination;
@@ -136,29 +111,33 @@ bool Flight::setDestination(const std::string &destination) {
 }
 
 /**
- * Metóda, ktorá priradí letu gate.
- * @param gateNumber Číslo gate-u na priradenie.
- * @return True ak let sa plánuje alebo pristáva.
+ * Metóda, ktorá vracia stringovú reprezentáciu fázy letu.
+ * @return Stringová reprezentácia fázy letu.
  */
-//TODO Kontrola gate/runway number sa musi vykonavat v airport.cpp. Asi by bolo dobre nejako upravit.
-bool Flight::assignGate(int gateNumber) {
-    if (status != FlightStatus::SCHEDULING && status != FlightStatus::LANDING)
-        return false;
-
-    this->gateNumber = gateNumber;
-    return true;
+std::string Flight::getFlightStatusString() const {
+    switch (status) {
+        case FlightStatus::BOARDING:
+            return "Boarding";
+        case FlightStatus::TAKING_OFF:
+            return "Taking off";
+        case FlightStatus::DEPARTING:
+            return "Departing";
+        case FlightStatus::ARRIVING:
+            return "Arriving";
+        case FlightStatus::LANDING:
+            return "Landing";
+        case FlightStatus::DISEMBARKING:
+            return "Disembarking";
+        default:
+            return "Scheduling";
+    }
 }
 
 /**
- * Metóda, ktorá priradí letu runway.
- * @param runwayNumber Číslo runway-e na priradenie.
- * @return True ak let boarduje alebo prilieta.
+ * Porovnávanie podľa priority fázy letu. Priorita je podľa poradia definície fáz letu.
+ * @param flight2 Let, s ktorým sa porovnáva priorita.
+ * @return True ak má flight (this) nižšiu prioritu ako flight2.
  */
-//TODO Kontrola gate/runway number sa musi vykonavat v airport.cpp. Asi by bolo dobre nejako upravit.
-bool Flight::assignRunway(int runwayNumber) {
-    if (status != FlightStatus::BOARDING && status != FlightStatus::ARRIVING)
-        return false;
-
-    this->runwayNumber = runwayNumber;
-    return true;
+bool Flight::operator<(const Flight &flight2) const {
+    return status < flight2.status;
 }

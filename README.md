@@ -1,8 +1,7 @@
 # Letisko
 
-Ako tému projektu som si zvolil letisko. Snažil som sa vytvoriť informačný systém letiska, 
-ktorý poskytuje cestujúcim informácie o prichádzajúcich a odchádzajúcich letoch. Okrem informáciách o letoch som sa v
-projekte zaoberal aj simulovaním letov. Projekt sa skladá zo siedmich, logicky oddelených tried
+Ako tému projektu som si zvolil letisko. Snažil som sa vytvoriť riadiaci systém letiska, ktorý umožňuje spravovať a
+simulovať prichádzajúce a odchádzajúce lety. Projekt sa skladá zo šiestich, logicky oddelených tried:
 
 1. Cities
 2. Flight
@@ -10,7 +9,6 @@ projekte zaoberal aj simulovaním letov. Projekt sa skladá zo siedmich, logicky
     1. Gate
     2. Runway
 6. Airport
-7. FileManager
 
 ---
 
@@ -23,14 +21,15 @@ letových spojení.
 Jej jediným atribútom je `std::set<std::string> cities`, ktorý obsahuje zmienené mestá, ktoré sú
 spojené s letiskom.  
 Ďalej obsahuje základné metódy na prácu s množinou a metódy na poskytovanie informácii
-o tejto množine. Bližšia dokumentácia k týmto metódam sa nachádza pri ich definíciách.  
-Trieda Cities poskytuje defaultny konštruktor a konštruktor `Cities(const std::vector<std::string> &listOfCities)`,
-ktorý naplní množinu mestami zo zoznamu.
+o tejto množine.  
+Trieda Cities poskytuje defaultny konštruktor, konštruktor `explicit Cities(const std::string &city)` a konštruktor
+`explicit Cities(const std::vector<std::string> &listOfCities)`. Bližšia dokumentácia k metódam a konštruktorom sa nachádza
+priamo pri ich implementáciách.
 
 ### Flight
 
 Trieda Flight reprezentuje let, ktorý z letiska odlieta alebo naň prilieta. Trieda slúži na poskytovanie informácií o
-lete a simuláciu letu. Trieda Flight má preto sedem atribútov
+lete a simuláciu letu. Trieda Flight má preto šesť atribútov
 
 - `int number` Identifikátor letu
 - `FlightStatus status` Stav, v ktorom sa let nachádza
@@ -38,12 +37,11 @@ lete a simuláciu letu. Trieda Flight má preto sedem atribútov
 - `std::string destination` Destinácia
 - `int gateNumber` Identifikátor prideleného gate-u
 - `int runwayNumber` Identifikátor pridelenej runway
-- `std::shared_ptr<Cities> connections` Množina možných leteckých spojení
 
 Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool schedule()` až `bool disembark()`)
 a klasické metódy pre OOP ako sú gettery a settery. Všetká dokumentácia k týmto metódam sa potom nachádza pri ich
 definíciách.  
-Trieda Flight poskytuje jediný konštruktor `Flight(int number, std::shared_ptr<Cities> connections)`.
+Trieda Flight poskytuje jediný konštruktor `explicit Flight(int number, FlightStatus status = FlightStatus::SCHEDULING);`.
 
 ### Infrastructure
 
@@ -74,11 +72,23 @@ letisku. Táto trieda je principiálne rovnaká ako trieda Gate.
 
 ### Airport
 
-Trieda Airport
+Trieda Airport reprezentuje celé letisko. Slúži na spravovanie infraštruktúry a riadenie letov. Táto trieda ma viacero
+atribútov:
 
-### FileManager
+- `const std::string city` Mesto, v ktorom sa nachádza letisko
+- `std::vector<std::shared_ptr<Flight>> flights` Zoznam všetkých letov, ktoré interagujú s letiskom
+- `std::priority_queue<std::shared_ptr<Flight>> arrivingFlights` Zoznam prilietajúcich letov
+- `std::priority_queue<std::shared_ptr<Flight>> departingFlights` Zoznam odchádzajúcich letov
+- `const size_t maximumNumberOfGates` Najvyšší možný počet gate-ov
+- `std::vector<std::shared_ptr<Gate>> gates` Zoznam všetkých gate-ov
+- `const size_t maximumNumberOfRunways` Najvyšší možný počet runway-ov
+- `std::vector<std::shared_ptr<Runway>> runways` Zoznam všetkých runway-ov
+- `std::shared_ptr<Cities> connections` Množina všetkých letovísk spojených s letiskom
 
-Trieda FileManager
+Trieda airport poskytuje jediný konštruktor `Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways)`,
+ktorý vytvorí prázdne letisko bez infraštruktúry a v množine destinácii bude iba mesto `city`, v ktorom sa nachádza toto
+letisko. `maximumNumberOfGates` a `maximumNumberOfRunways` sa nedá po vytvorení letiska už modifikovať. Dokumentácia ku
+všetkým metódam tejto triedy sa nachádza priamo pri ich implementáciách.
 
 ---
 
@@ -117,7 +127,7 @@ const int MAX_FLIGHT_NUMBER = 9999;
 
 // Flight.cpp
 
-Flight::Flight(int number, std::shared_ptr<Cities> connections) : connections(std::move(connections)), status(FlightStatus::CREATING), gateNumber(-1), runwayNumber(-1) {
+Flight::Flight(int number, FlightStatus status) :  status(status), gateNumber(-1), runwayNumber(-1) {
     if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
         throw std::invalid_argument("Flight number must be an integer ranging from 0 to 9999.");
     ...

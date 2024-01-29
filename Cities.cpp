@@ -1,6 +1,14 @@
 #include "Cities.h"
 
 /**
+ * Konštruktor, ktorý vytvorí množinu miest, ktorá obsahuje mesto.
+ * @param city Mesto, ktoré má byť v množine.
+ */
+Cities::Cities(const std::string &city) {
+    add(city);
+}
+
+/**
  * Konštruktor, ktorý vytvorí množinu miest zo zoznamu.
  * @param listOfCities Vector miest, z ktorých má vytvoriť množinu miest.
  */
@@ -58,8 +66,9 @@ size_t Cities::add(const std::vector<std::string>& listOfCities) {
 
     size_t count = 0;
     for (const std::string& city : listOfCities)
-        if (add(city))
-            count++;
+        if (!contains(city))
+            if (add(city))
+                count++;
     return count;
 }
 

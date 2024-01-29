@@ -11,6 +11,7 @@ class Cities {
     bool isValid(const std::string &city);
 public:
     Cities() = default;;
+    explicit Cities(const std::string &city);
     explicit Cities(const std::vector<std::string> &listOfCities);
 
     bool add(const std::string &city);

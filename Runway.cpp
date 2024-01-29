@@ -19,7 +19,6 @@ bool Runway::assignFlight(std::shared_ptr<Flight> flight) {
  * Metóda, ktorá uvoľní runway.
  */
 void Runway::releaseFlight() {
-    flight->unassignRunway();
     flight = nullptr;
     status = Status::VACANT;
 }

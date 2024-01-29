@@ -19,7 +19,6 @@ bool Gate::assignFlight(std::shared_ptr<Flight> flight) {
  * Metóda, ktorá uvoľní gate.
  */
 void Gate::releaseFlight() {
-    flight->unassignGate();
     flight = nullptr;
     status = Status::VACANT;
 }
