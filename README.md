@@ -36,10 +36,10 @@ lete a simuláciu letu. Trieda Flight má preto šesť atribútov
 - `std::string origin` Miesto odletu
 - `std::string destination` Destinácia
 
-Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool schedule()` až `bool disembark()`)
+Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool board()` až `bool disembark()`)
 a klasické metódy pre OOP ako sú gettery a settery. Všetká dokumentácia k týmto metódam sa potom nachádza pri ich
 definíciách.  
-Trieda Flight poskytuje jediný konštruktor `explicit Flight(int number, FlightStatus status = FlightStatus::CREATING);`.
+Trieda Flight poskytuje jediný konštruktor `explicit Flight(int number, FlightStatus status)`.
 
 ### Infrastructure
 
@@ -93,8 +93,9 @@ všetkým metódam tejto triedy sa nachádza priamo pri ich implementáciách.
 #### Trieda Flight
 
 Z triedy Flight som presunul atribút `std::shared_ptr<Cities> connections` do triedy Airport, kde dáva väčší zmysel ho
-uchovávať. Ďalej som odstránil atribúty `int gateNumber` a `int runwayNumber`, lebo sa stali nepotrebnými a výrazne
-zvyšovali komplexitu triedy Airport.
+uchovávať. Ďalej som odstránil atribúty `int gateNumber` a `int runwayNumber`, lebo výrazne zvyšovali komplexitu triedy
+Airport. Odstránil som aj enumerátor `FlightStatus::CREATING` a metódy s ním spojené lebo sa stal nepotrebným a
+taktiež zvyšoval komplexitu triedy Airport.
 
 ### Zmeny na základe spätnej väzby
 

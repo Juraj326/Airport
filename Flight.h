@@ -14,12 +14,12 @@ const int MAX_FLIGHT_NUMBER = 9999;
  * Symbolizuje fázu letu.
  */
 enum class FlightStatus {
-    SCHEDULED,   // prvý kontakt s odchádzajúcim letom
-    ARRIVING,   // prvý kontakt s prichádzajúcim letom
-    DEPARTED,  // koniec odchádzajúceho letu
-    DISEMBARKED,   // koniec prichádzajúceho letu
-    BOARDED, // let je pripravený odletieť
-    LANDED // let je pripravený pristáť, najvyššia priorita
+    SCHEDULED,
+    ARRIVING,
+    BOARDED,
+    LANDED,
+    DEPARTED,
+    DISEMBARKED
 };
 
 FlightStatus stringToFlightStatus(const std::string &status);

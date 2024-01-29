@@ -301,6 +301,7 @@ TEST(Airport, AddGateRunway) {
 
 TEST(Airport, AddFlight) {
     Airport airport("Bratislava", 5, 2);
+
     ASSERT_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "Vienna"), std::invalid_argument);
     ASSERT_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "Bratislava"), std::invalid_argument);
 
@@ -326,7 +327,21 @@ TEST(Airport, AddFlight) {
 
     ASSERT_EQ(airport.getNumberOfArrivingFlights(), 2);
     ASSERT_EQ(airport.getNumberOfDepartingFlights(), 2);
+}
 
+TEST(Airport, RemoveFlight) {
+    Airport airport("Bratislava", 5, 2);
+    ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::BOARDED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(2, FlightStatus::BOARDED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(3, FlightStatus::BOARDED, "Bratislava", "New York"));
+
+    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 3);
+    airport.removeFlight(2);
+    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 2);
 }
 
 TEST(Airport, Save) {
