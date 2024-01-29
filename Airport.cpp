@@ -9,11 +9,6 @@
 Airport::Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways) :
     city(city), maximumNumberOfGates(maximumNumberOfGates), maximumNumberOfRunways(maximumNumberOfRunways) {
     connections = std::make_shared<Cities>(city);
-
-    // Nie je najšťastnejšie riešenie ale nič lepšie mi nenapadlo.
-    for (FlightStatus status : {FlightStatus::SCHEDULED, FlightStatus::BOARDED, FlightStatus::DEPARTED,
-                                FlightStatus::ARRIVING, FlightStatus::LANDED, FlightStatus::DISEMBARKED})
-        flights[status];
 }
 
 /**
@@ -84,26 +79,15 @@ void Airport::addFlight(int flightNumber, FlightStatus status, const std::string
         throw std::invalid_argument(errorMsg.str());
     }
 
-    flights.at(status).push(newFlight);
-    manageFlight(newFlight);
+    flights.emplace_back(newFlight);
 }
 
 /**
  * Metóda, ktorá odstráni let zo zoznamu letov.
- * @param flightNumber Číslo letu, ktorý sa má odstrániť.
+ * @param flight Let, ktorý sa má odstrániť.
  */
-void Airport::removeFlight(int flightNumber) {
-    for (auto &statusQueue : flights) {
-        std::queue<std::shared_ptr<Flight>> tmpQueue;
-        while (!statusQueue.second.empty()) {
-            std::shared_ptr<Flight> flight = statusQueue.second.front();
-            statusQueue.second.pop();
-
-            if (flight->getFlightNumber() != flightNumber)
-                tmpQueue.push(flight);
-        }
-        statusQueue.second = tmpQueue;
-    }
+void Airport::removeFlight(std::shared_ptr<Flight> &flight) {
+    flights.erase(std::remove(flights.begin(), flights.end(), flight),flights.end());
 }
 
 
@@ -111,7 +95,9 @@ void Airport::removeFlight(int flightNumber) {
  * Metóda, ktorá rozhoduje, čo sa má stať s letom.
  * @param flight Let, o ktorom sa rozhoduje.
  */
-void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
+std::string Airport::manageFlight(int flightNumber) {
+    std::shared_ptr<Flight> flight = findFlight(flightNumber);
+    std::ostringstream flightInfo;
     switch (flight->getFlightStatus()) {
         case FlightStatus::ARRIVING:
             try {
@@ -119,25 +105,29 @@ void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
                 vacantRunway->assignFlight(flight);
                 runways.at(vacantRunway) = flight;
                 flight->land();
+                flightInfo << "Flight " << flightNumber << " is landing on runway " << vacantRunway->getNumber() << ".\n";
+
             } catch (std::runtime_error &e) {
-                break;
+                flightInfo << "Flight " << flightNumber << " could not land because there isn't a vacant runway.\n";
+                return flightInfo.str();
             }
             break;
         case FlightStatus::LANDED:
             try {
+                std::shared_ptr<Gate> vacantGate = findVacantGate();
+
                 std::shared_ptr<Runway> assignedRunway = findAssignedRunway(flight);
                 assignedRunway->releaseFlight();
                 runways.at(assignedRunway) = nullptr;
-            } catch (std::invalid_argument &e) {
-                break;
-            }
-            try {
-                std::shared_ptr<Gate> vacantGate = findVacantGate();
+
                 vacantGate->assignFlight(flight);
                 gates.at(vacantGate) = flight;
                 flight->disembark();
+                flightInfo << "Flight " << flightNumber << " is disembarking at gate " << vacantGate->getNumber() << ".\n";
+
             } catch (std::runtime_error &e) {
-                break;
+                flightInfo << "Flight " << flightNumber << " could not disembark because there isn't a vacant gate.\n";
+                return flightInfo.str();
             }
             break;
         case FlightStatus::DISEMBARKED:
@@ -145,9 +135,11 @@ void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
                 auto assignedGate = findAssignedGate(flight);
                 assignedGate->releaseFlight();
                 gates.at(assignedGate) = nullptr;
-                removeFlight(flight->getFlightNumber());
+                removeFlight(flight);
+                flightInfo << "Flight " << flightNumber << " has disembarked at gate " << assignedGate->getNumber() << ".\n";
             } catch (std::invalid_argument &e) {
-                break;
+                flightInfo << "Gate not found.\n";
+                return flightInfo.str();
             }
             break;
         case FlightStatus::SCHEDULED:
@@ -156,37 +148,42 @@ void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
                 vacantGate->assignFlight(flight);
                 gates.at(vacantGate) = flight;
                 flight->board();
+                flightInfo << "Flight " << flightNumber << " is boarding at gate " << vacantGate->getNumber() << ".\n";
             } catch (std::runtime_error &e) {
-                break;
+                flightInfo << "Flight " << flightNumber << " could not begin boarding because there isn't a vacant gate.\n";
+                return flightInfo.str();
             }
             break;
         case FlightStatus::BOARDED:
             try {
-                std::shared_ptr<Gate> assignedGate = findAssignedGate(f-0light);
+                std::shared_ptr<Runway> vacantRunway = findVacantRunway();
+
+                std::shared_ptr<Gate> assignedGate = findAssignedGate(flight);
                 assignedGate->releaseFlight();
                 gates.at(assignedGate) = nullptr;
-            } catch (std::invalid_argument &e) {
-                break;
-            }
-            try {
-                std::shared_ptr<Runway> vacantRunway = findVacantRunway();
+
                 vacantRunway->assignFlight(flight);
                 runways.at(vacantRunway) = flight;
                 flight->take_off();
+                flightInfo << "Flight " << flightNumber << " is taking off from runway " << vacantRunway->getNumber() << ".\n";
             } catch (std::runtime_error &e) {
-                break;
+                flightInfo << "Flight " << flight->getFlightNumber() << " could not take off because there isn't a vacant runway.\n";
+                return flightInfo.str();
             }
             break;
         case FlightStatus::DEPARTED:
             try {
                 auto assignedRunway = findAssignedRunway(flight);
                 assignedRunway->releaseFlight();
-                removeFlight(flight->getFlightNumber());
+                removeFlight(flight);
+                flightInfo << "Flight " << flightNumber << " has departed for " << flight->getDestination() << ".\n";
             } catch (std::invalid_argument &e) {
-                break;
+                flightInfo << "Runway not found.\n";
+                return flightInfo.str();
             }
             break;
     }
+    return flightInfo.str();
 }
 
 /**
@@ -211,24 +208,6 @@ std::shared_ptr<Runway> Airport::findVacantRunway() const {
 
     auto runway = std::find_if(runways.begin(), runways.end(), [] (const std::pair<std::shared_ptr<Runway>, std::shared_ptr<Flight>> &runway) { return runway.first->isVacant(); });
     return runway->first;
-}
-
-/**
- * Metóda, ktorá priraďuje runway-e letom podľa viacerých faktorov:
- * 1. Počet voľných gate-ov (limit 80%)
- * 2. Počet prichádzajúcich letov a počet odchádzajúcich letov
- * 3. Pristávajúce lety majú vyššiu prioritu ako odlietajúce.
- * 4. Poradie letov podľa priority.
- */
-void Airport::manageTraffic() {
-    std::ostringstream trafficChanges;
-    if (100 * countVacantGates() / getNumberOfGates() < 20) {
-        return;
-    }
-    if (getNumberOfDepartingFlights() > getNumberOfArrivingFlights()) {
-        return;
-    }
-
 }
 
 /**
@@ -257,6 +236,12 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
         std::getline(flightStream, origin, ';');
         std::getline(flightStream, destination, '\n');
 
+        if (status != "Scheduled" && status != "Arriving") {
+            std::ostringstream errorMsg;
+            errorMsg << "Unable to load flight " << number << " from file " << fileName << ". Only scheduled and arriving flights can be loaded.";
+            throw std::invalid_argument(errorMsg.str());
+        }
+
         try {
             addFlight(std::stoi(number), stringToFlightStatus(status), origin, destination);
         } catch (const std::invalid_argument &e) {
@@ -268,7 +253,6 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
     }
 
     inputFile.close();
-    //TODO pridat metodu, ktora priradi gates a runways
     return count;
 }
 
@@ -277,7 +261,7 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
  * @param fileName Názov súboru, do ktorého sa majú lety uložiť.
  * @return True ak boli lety uložené.
  */
-bool Airport::saveFlightsToFile(const std::string &fileName) {
+bool Airport::saveFlightsToFile(const std::string &fileName) const {
     if (flights.empty())
         return false;
 
@@ -286,19 +270,11 @@ bool Airport::saveFlightsToFile(const std::string &fileName) {
     if (!outputFile.is_open())
         return false;
 
-    for (auto &statusQueue : flights) {
-        std::queue<std::shared_ptr<Flight>> tmpQueue;
-        while (!statusQueue.second.empty()) {
-            std::shared_ptr<Flight> flight = statusQueue.second.front();
-            statusQueue.second.pop();
+    for (const std::shared_ptr<Flight> &flight : flights) {
             outputFile << flight->getFlightNumber() << ";";
             outputFile << flightStatusToString(flight->getFlightStatus()) << ";";
             outputFile << flight->getOrigin() << ";";
             outputFile << flight->getDestination() << "\n";
-
-            tmpQueue.push(flight);
-        }
-        statusQueue.second = tmpQueue;
     }
 
     outputFile.close();
@@ -367,29 +343,24 @@ size_t Airport::countVacantRunways() const {
     return std::count_if(runways.begin(), runways.end(), [] (const std::pair<std::shared_ptr<Runway>, std::shared_ptr<Flight>> &runway) { return runway.first->isVacant(); });
 }
 
+std::shared_ptr<Flight> &Airport::findFlight(int flightNumber) {
+    auto flight = std::find_if(flights.begin(), flights.end(), [flightNumber] (const std::shared_ptr<Flight> &flight) { return flight->getFlightNumber() == flightNumber; });
+    if (flight == flights.end()) {
+        std::ostringstream errorMsg;
+        errorMsg << "Flight " << flightNumber << " not found.";
+        throw std::invalid_argument(errorMsg.str());
+    }
+    return *flight;
+}
+
 /**
  * Metóda, ktorá skontroluje či s letiskom interaguje daný let.
- * @param number Číslo letu.
+ * @param flightNumber Číslo letu.
  * @return True ak s letiskom interaguje let s číslom number.
  */
-bool Airport::hasFlight(int number) {
-    for (auto &statusQueue : flights) {
-        std::queue<std::shared_ptr<Flight>> tmpQueue;
-        while (!statusQueue.second.empty()) {
-            std::shared_ptr<Flight> flight = statusQueue.second.front();
-            statusQueue.second.pop();
-
-            if (flight->getFlightNumber() == number) {
-                tmpQueue.push(flight);
-                statusQueue.second = tmpQueue;
-                return true;
-            }
-
-            tmpQueue.push(flight);
-        }
-        statusQueue.second = tmpQueue;
-    }
-    return false;
+bool Airport::hasFlight(int flightNumber) {
+    auto flight = std::find_if(flights.begin(), flights.end(), [flightNumber] (std::shared_ptr<Flight> &flight) { return flight->getFlightNumber() == flightNumber; });
+    return flight != flights.end();
 }
 
 /**
@@ -413,34 +384,12 @@ bool Airport::hasRunway(int runwayNumber) const {
 }
 
 /**
- * Metóda, ktorá vráti počet letov, ktoré majú letisko ako destináciu
- * @return Počet letov.
- */
-size_t Airport::getNumberOfArrivingFlights() const {
-    size_t count = 0;
-    count += flights.at(FlightStatus::ARRIVING).size();
-    count += flights.at(FlightStatus::LANDED).size();
-    return count;
-}
-
-/**
- Metóda, ktorá vráti počet letov, ktoré majú letisko ako pôvod
- * @return Počet letov.
- */
-size_t Airport::getNumberOfDepartingFlights() const {
-    size_t count = 0;
-    count += flights.at(FlightStatus::SCHEDULED).size();
-    count += flights.at(FlightStatus::BOARDED).size();
-    return count;
-}
-
-/**
  * Metóda, ktorá vráti gate, ktorému je priradený let.
  * @param flight Let, ktorý je priradený gate-u.
  * @return Hľadaný gate.
  */
 const std::shared_ptr<Gate> &Airport::findAssignedGate(const std::shared_ptr<Flight> &flight) const {
-    auto gate = std::find_if(gates.begin(), gates.end(), [flight] (const std::pair<std::shared_ptr<Gate>, std::shared_ptr<Flight>> &gate) {return gate.second->getFlightNumber() == flight->getFlightNumber();});
+    auto gate = std::find_if(gates.begin(), gates.end(), [flight] (const std::pair<std::shared_ptr<Gate>, std::shared_ptr<Flight>> &gate) {return gate.second == flight;});
     if (gate == gates.end())
         throw std::invalid_argument("There's no such flight assigned to a gate.");
     return gate->first;
@@ -452,7 +401,7 @@ const std::shared_ptr<Gate> &Airport::findAssignedGate(const std::shared_ptr<Fli
  * @return Hľadaná runway.
  */
 const std::shared_ptr<Runway> &Airport::findAssignedRunway(const std::shared_ptr<Flight> &flight) const {
-    auto runway = std::find_if(runways.begin(), runways.end(), [flight] (const std::pair<std::shared_ptr<Runway>, std::shared_ptr<Flight>> &runway) {return runway.second->getFlightNumber() == flight->getFlightNumber();});
+    auto runway = std::find_if(runways.begin(), runways.end(), [flight] (const std::pair<std::shared_ptr<Runway>, std::shared_ptr<Flight>> &runway) {return runway.second == flight;});
     if (runway == runways.end())
         throw std::invalid_argument("There's no such flight assigned to a runway.");
     return runway->first;

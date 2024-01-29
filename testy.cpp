@@ -34,6 +34,22 @@ TEST(Cities, NespravneNazvy) {
     ASSERT_EQ(cities.size(), 2);
 }
 
+TEST(Cities, NazvySMedzerami) {
+    Cities cities;
+    ASSERT_TRUE(cities.add("New York"));
+    ASSERT_TRUE(cities.add("Rio de Janeiro"));
+    ASSERT_TRUE(cities.add("Nove Mesto nad Vahom"));
+    ASSERT_TRUE(cities.add("San Francisco"));
+    ASSERT_FALSE(cities.add(" Bratislava"));
+    ASSERT_FALSE(cities.add("New  York"));
+}
+
+TEST(Cities, NazvySMedzeramiList) {
+    Cities cities;
+    std::vector<std::string> listOfCities = {"New York", "Rio de Janeiro", "Nove Mesto nad Vahom", "San Francisco", " Bratislava", "New  York", " San  Francisco"};
+    ASSERT_EQ(cities.add(listOfCities), 4);
+}
+
 TEST(Cities, Add) {
     Cities city;
     ASSERT_TRUE(city.add("Bratislava"));
@@ -42,7 +58,6 @@ TEST(Cities, Add) {
     ASSERT_TRUE(city.add("New York"));
     ASSERT_FALSE(city.add(" New York"));
     ASSERT_FALSE(city.add("New  York"));
-
 
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Prague", "Budapest", "London", "New York", " S hanghai"};
     Cities cities;
@@ -192,7 +207,7 @@ TEST(Flight, StatusString) {
     ASSERT_EQ(stringToFlightStatus("Disembarked"), FlightStatus::DISEMBARKED);
 }
 
-TEST(Infrastructure , Konstruktor) {
+TEST(Infrastructure, Konstruktor) {
     ASSERT_THROW({Gate gate(-1);}, std::invalid_argument);
     ASSERT_THROW({Gate gate(37);}, std::invalid_argument);
     ASSERT_NO_THROW(Gate gate(36));
@@ -268,22 +283,12 @@ TEST(Airport, Konstruktor) {
     Airport airport("Bratislava", 5, 2);
     ASSERT_EQ(airport.getNumberOfGates(), 0);
     ASSERT_EQ(airport.getNumberOfRunways(), 0);
-    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 0);
-    ASSERT_EQ(airport.getNumberOfArrivingFlights(), 0);
+    ASSERT_EQ(airport.getNumberOfFlights(), 0);
     ASSERT_TRUE(airport.addConnection("Prague"));
     ASSERT_TRUE(airport.addGate(1));
     ASSERT_TRUE(airport.addRunway(1));
     ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Prague", "Bratislava"));
     ASSERT_NO_THROW(airport.addFlight(2, FlightStatus::SCHEDULED, "Bratislava", "Prague"));
-}
-
-TEST(Airport, Connections) {
-    Airport airport("Bratislava", 5, 2);
-    ASSERT_TRUE(airport.addConnection("New York"));
-    ASSERT_TRUE(airport.addConnection("Prague"));
-    ASSERT_TRUE(airport.addConnection("Vienna"));
-    std::vector<std::string> cities = {"New York", "Prague", "Vienna", "Budapest"};
-    ASSERT_EQ(airport.addConnections(cities), 1);
 }
 
 TEST(Airport, AddGateRunway) {
@@ -299,49 +304,101 @@ TEST(Airport, AddGateRunway) {
     ASSERT_FALSE(airport.addRunway(1));
 }
 
+TEST(Airport, Connections) {
+    Airport airport("Bratislava", 5, 2);
+    ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addConnection("Prague"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    std::vector<std::string> cities = {"New York", "Prague", "Vienna", "Budapest"};
+    ASSERT_EQ(airport.addConnections(cities), 1);
+}
+
 TEST(Airport, AddFlight) {
     Airport airport("Bratislava", 5, 2);
+    ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(2));
+
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(77, FlightStatus::ARRIVING, "New York", "Bratislava"));
+    ASSERT_NO_THROW(airport.addFlight(44, FlightStatus::SCHEDULED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(11, FlightStatus::ARRIVING, "New York", "Bratislava"));
+
+    ASSERT_EQ(airport.getNumberOfFlights(), 4);
+}
+
+TEST(Airport, AddFlightBezConnections) {
+    Airport airport("Bratislava", 5, 2);
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(2));
 
     ASSERT_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "Vienna"), std::invalid_argument);
     ASSERT_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "Bratislava"), std::invalid_argument);
+}
 
+TEST(Airport, AddFlightBezInfrastruktury) {
+    Airport airport("Bratislava", 5, 2);
     ASSERT_TRUE(airport.addConnection("New York"));
     ASSERT_TRUE(airport.addConnection("Vienna"));
 
-    ASSERT_TRUE(airport.addGate(1));
-    ASSERT_TRUE(airport.addRunway(1));
-
-    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::BOARDED, "Bratislava", "New York"));
-
-    ASSERT_THROW(airport.addFlight(5, FlightStatus::DEPARTED, "Bratislava", "Bratislava"), std::invalid_argument);
-    ASSERT_THROW(airport.addFlight(5, FlightStatus::DEPARTED, "Vienna", "New York"), std::invalid_argument);
-
-    ASSERT_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "New York", "Bratislava"), std::invalid_argument);
-
-    ASSERT_THROW(airport.addFlight(77, FlightStatus::SCHEDULED, "New York", "Bratislava"), std::invalid_argument);
-    ASSERT_THROW(airport.addFlight(44, FlightStatus::ARRIVING, "Bratislava", "New York"), std::invalid_argument);
-
-    ASSERT_NO_THROW(airport.addFlight(77, FlightStatus::ARRIVING, "New York", "Bratislava"));
-    ASSERT_NO_THROW(airport.addFlight(44, FlightStatus::SCHEDULED, "Bratislava", "New York"));
-    ASSERT_NO_THROW(airport.addFlight(11, FlightStatus::LANDED, "New York", "Bratislava"));
-
-    ASSERT_EQ(airport.getNumberOfArrivingFlights(), 2);
-    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 2);
+    ASSERT_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "Vienna"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "Bratislava"), std::invalid_argument);
 }
 
-TEST(Airport, RemoveFlight) {
+TEST(Airport, AddFlightDuplikaty) {
     Airport airport("Bratislava", 5, 2);
     ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
     ASSERT_TRUE(airport.addGate(1));
     ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(2));
 
-    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::BOARDED, "Bratislava", "New York"));
-    ASSERT_NO_THROW(airport.addFlight(2, FlightStatus::BOARDED, "Bratislava", "New York"));
-    ASSERT_NO_THROW(airport.addFlight(3, FlightStatus::BOARDED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(77, FlightStatus::ARRIVING, "New York", "Bratislava"));
+    ASSERT_NO_THROW(airport.addFlight(44, FlightStatus::SCHEDULED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(11, FlightStatus::ARRIVING, "New York", "Bratislava"));
 
-    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 3);
-    airport.removeFlight(2);
-    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 2);
+    ASSERT_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "Bratislava"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(77, FlightStatus::SCHEDULED, "Vienna", "Bratislava"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(44, FlightStatus::ARRIVING, "Bratislava", "Vienna"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(11, FlightStatus::ARRIVING, "Vienna", "Bratislava"), std::invalid_argument);
+}
+
+TEST(Airport, AddFlightZleMesta) {
+    Airport airport("Bratislava", 5, 2);
+    ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(2));
+
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::SCHEDULED, "Bratislava", "Bratislava"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::SCHEDULED, "Vienna", "New York"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::ARRIVING, "San Francisco", "New York"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::ARRIVING, "Bratislava", "Bratislava"), std::invalid_argument);
+}
+
+TEST(Airport, AddFlightZlyStatus) {
+    Airport airport("Bratislava", 5, 2);
+    ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(2));
+
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::BOARDED, "Bratislava", "Vienna"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::DISEMBARKED, "Vienna", "Bratislava"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::DEPARTED, "Bratislava", "New York"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(5, FlightStatus::LANDED, "New York", "Bratislava"), std::invalid_argument);
+
 }
 
 TEST(Airport, Save) {
@@ -352,10 +409,11 @@ TEST(Airport, Save) {
     ASSERT_TRUE(airport.addGate(10));
     ASSERT_TRUE(airport.addRunway(0));
     ASSERT_TRUE(airport.addRunway(36));
-    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::LANDED, "New York", "Bratislava"));
-    ASSERT_NO_THROW(airport.addFlight(10, FlightStatus::BOARDED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "New York", "Bratislava"));
+    ASSERT_NO_THROW(airport.addFlight(10, FlightStatus::SCHEDULED, "Bratislava", "New York"));
     ASSERT_NO_THROW(airport.addFlight(2, FlightStatus::SCHEDULED, "Bratislava", "Vienna"));
     ASSERT_NO_THROW(airport.addFlight(77, FlightStatus::ARRIVING, "New York", "Bratislava"));
+
     ASSERT_TRUE(airport.saveFlightsToFile("Flights1.txt"));
 }
 
@@ -383,23 +441,178 @@ TEST(Airport, LoadNeuspesne) {
     ASSERT_THROW(airport.loadFlightsFromFile("Flights2.txt"), std::invalid_argument);
 }
 
-TEST(Airport, ManageFlight) {
-    Airport airport("Bratislava", 10, 2);
-    for (int i = 0; i < 10; i++)
-        ASSERT_TRUE(airport.addGate(i * 3));
-    ASSERT_TRUE(airport.addRunway(11));
-    ASSERT_TRUE(airport.addRunway(25));
-    for (std::string city : {"New York", "Vienna", "Prague", "Budapest", "Shanghai", "San Francisco", "Paris", "Berlin"})
-        ASSERT_TRUE(airport.addConnection(city));
+TEST(Airport, ManageTrafficOutgoing) {
+    Airport airport("Bratislava", 3, 2);
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "Vienna"));
 
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.getFlightStatus(1), FlightStatus::BOARDED);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.getFlightStatus(1), FlightStatus::DEPARTED);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+
+    ASSERT_THROW(airport.manageFlight(1), std::invalid_argument);
 }
 
-TEST(Airport, ManageTraffic) {
-    Airport airport("Bratislava", 10, 2);
-    for (int i = 0; i < 10; i++)
-        ASSERT_TRUE(airport.addGate(i * 3));
-    ASSERT_TRUE(airport.addRunway(11));
-    ASSERT_TRUE(airport.addRunway(25));
-    for (std::string city : {"New York", "Vienna", "Prague", "Budapest", "Shanghai", "San Francisco", "Paris", "Berlin"})
+TEST(Airport, ManageTrafficIncoming) {
+    Airport airport("Bratislava", 3, 2);
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "Bratislava"));
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.getFlightStatus(1), FlightStatus::LANDED);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.getFlightStatus(1), FlightStatus::DISEMBARKED);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+
+    ASSERT_THROW(airport.manageFlight(1), std::invalid_argument);
+}
+
+TEST(Airport, ManageTrafficNoRunways) {
+    Airport airport("San Francisco", 3, 2);
+    ASSERT_TRUE(airport.addConnection("Berlin"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "San Francisco"));
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.getFlightStatus(1), FlightStatus::LANDED);
+    ASSERT_EQ(airport.countVacantRunways(), 0);
+
+    ASSERT_NO_THROW(airport.addFlight(1234, FlightStatus::SCHEDULED, "San Francisco", "Berlin"));
+    ASSERT_NO_THROW(airport.manageFlight(1234));
+    ASSERT_EQ(airport.getFlightStatus(1234), FlightStatus::BOARDED);
+
+    ASSERT_EQ(airport.countVacantRunways(), 0);
+    ASSERT_EQ(airport.manageFlight(1234), "Flight 1234 could not take off because there isn't a vacant runway.\n");
+
+    ASSERT_TRUE(airport.addRunway(36));
+    ASSERT_EQ(airport.manageFlight(1234), "Flight 1234 is taking off from runway 36.\n");
+}
+
+
+TEST(Airport, VacantGatesRunways) {
+    Airport airport("Bratislava", 2, 2);
+    ASSERT_EQ(airport.countVacantGates(), 0);
+
+    ASSERT_TRUE(airport.addConnection("New York"));
+    ASSERT_TRUE(airport.addConnection("Vienna"));
+    ASSERT_TRUE(airport.addGate(1));
+    ASSERT_TRUE(airport.addRunway(1));
+    ASSERT_TRUE(airport.addGate(2));
+    ASSERT_TRUE(airport.addRunway(2));
+    ASSERT_EQ(airport.countVacantGates(), 2);
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "New York"));
+    ASSERT_EQ(airport.countVacantGates(), 2);
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.countVacantGates(), 1);
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.countVacantGates(), 2);
+    ASSERT_EQ(airport.countVacantRunways(), 1);
+
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.countVacantGates(), 2);
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.manageFlight(1));
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+    ASSERT_NO_THROW(airport.addFlight(44, FlightStatus::ARRIVING, "Vienna", "Bratislava"));
+    ASSERT_NO_THROW(airport.manageFlight(44));
+    ASSERT_EQ(airport.countVacantRunways(), 1);
+
+    ASSERT_NO_THROW(airport.manageFlight(44));
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+    ASSERT_EQ(airport.countVacantGates(), 0);
+}
+
+TEST(Airport, Everything) {
+    Airport airport("Paris", 3, 2);
+    for (int i = 0; i < 2; i++)
+        ASSERT_TRUE(airport.addGate(i * 10));
+    ASSERT_TRUE(airport.addRunway(12));
+    ASSERT_TRUE(airport.addRunway(36));
+    for (std::string city : {"New York", "Vienna", "Prague", "Budapest", "Shanghai", "San Francisco", "Berlin"})
         ASSERT_TRUE(airport.addConnection(city));
+
+    ASSERT_NO_THROW(airport.addFlight(1111, FlightStatus::SCHEDULED, "Paris", "Vienna"));
+    ASSERT_NO_THROW(airport.addFlight(2222, FlightStatus::SCHEDULED, "Paris", "Shanghai"));
+    ASSERT_NO_THROW(airport.addFlight(3333, FlightStatus::SCHEDULED, "Paris", "San Francisco"));
+    ASSERT_NO_THROW(airport.addFlight(4444, FlightStatus::ARRIVING, "New York", "Paris"));
+    ASSERT_NO_THROW(airport.addFlight(5555, FlightStatus::ARRIVING, "Budapest", "Paris"));
+
+    ASSERT_EQ(airport.manageFlight(1111), "Flight 1111 is boarding at gate 0.\n");
+    ASSERT_EQ(airport.manageFlight(3333), "Flight 3333 is boarding at gate 10.\n");
+
+    ASSERT_EQ(airport.countVacantGates(), 0);
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+
+    ASSERT_EQ(airport.manageFlight(2222), "Flight 2222 could not begin boarding because there isn't a vacant gate.\n");
+
+    ASSERT_EQ(airport.manageFlight(5555), "Flight 5555 is landing on runway 12.\n");
+    ASSERT_EQ(airport.manageFlight(4444), "Flight 4444 is landing on runway 36.\n");
+
+    ASSERT_EQ(airport.countVacantGates(), 0);
+    ASSERT_EQ(airport.countVacantRunways(), 0);
+
+    ASSERT_EQ(airport.manageFlight(5555), "Flight 5555 could not disembark because there isn't a vacant gate.\n");
+    ASSERT_EQ(airport.manageFlight(1111), "Flight 1111 could not take off because there isn't a vacant runway.\n");
+
+    ASSERT_TRUE(airport.addGate(20));
+
+    ASSERT_EQ(airport.countVacantGates(), 1);
+    ASSERT_EQ(airport.countVacantRunways(), 0);
+
+    ASSERT_EQ(airport.manageFlight(5555), "Flight 5555 is disembarking at gate 20.\n");
+
+    ASSERT_EQ(airport.countVacantGates(), 0);
+    ASSERT_EQ(airport.countVacantRunways(), 1);
+
+    ASSERT_EQ(airport.manageFlight(5555), "Flight 5555 has disembarked at gate 20.\n");
+    ASSERT_EQ(airport.countVacantGates(), 1);
+    ASSERT_EQ(airport.countVacantRunways(), 1);
+
+    ASSERT_NO_THROW(airport.addFlight(7777, FlightStatus::ARRIVING, "Prague", "Paris"));
+
+    ASSERT_EQ(airport.manageFlight(4444), "Flight 4444 is disembarking at gate 20.\n");
+    ASSERT_EQ(airport.countVacantGates(), 0);
+    ASSERT_EQ(airport.countVacantRunways(), 2);
+
+    ASSERT_EQ(airport.manageFlight(2222), "Flight 2222 could not begin boarding because there isn't a vacant gate.\n");
+    ASSERT_EQ(airport.manageFlight(1111), "Flight 1111 is taking off from runway 12.\n");
+    ASSERT_EQ(airport.manageFlight(7777), "Flight 7777 is landing on runway 36.\n");
+    ASSERT_EQ(airport.countVacantGates(), 1);
+    ASSERT_EQ(airport.countVacantRunways(), 0);
+
+    ASSERT_EQ(airport.manageFlight(4444), "Flight 4444 has disembarked at gate 20.\n");
+
+    ASSERT_EQ(airport.getNumberOfFlights(), 4);
+
+    ASSERT_EQ(airport.manageFlight(7777), "Flight 7777 is disembarking at gate 0.\n");
+    ASSERT_EQ(airport.manageFlight(2222), "Flight 2222 is boarding at gate 20.\n");
+    ASSERT_EQ(airport.manageFlight(3333), "Flight 3333 is taking off from runway 36.\n");
+    ASSERT_EQ(airport.manageFlight(1111), "Flight 1111 has departed for Vienna.\n");
+
+
+    ASSERT_EQ(airport.countVacantGates(), 1);
+    ASSERT_EQ(airport.countVacantRunways(), 1);
 }

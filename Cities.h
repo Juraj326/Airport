@@ -21,5 +21,5 @@ public:
     size_t size() const;
     std::string getListOfCities() const;
 private:
-    bool isValid(const std::string &city);
+    bool isValid(const std::string &city) const;
 };

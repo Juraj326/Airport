@@ -8,6 +8,8 @@
 Flight::Flight(int number, FlightStatus status) :  status(status) {
     if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
         throw std::invalid_argument("Flight number must be an integer ranging from 0 to 9999.");
+    if (status != FlightStatus::SCHEDULED && status != FlightStatus::ARRIVING)
+        throw std::invalid_argument("Flight status must be either SCHEDULED or ARRIVING.");
 
     this->number = number;
 }

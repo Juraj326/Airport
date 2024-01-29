@@ -1,5 +1,4 @@
 #include <vector>
-#include <queue>
 #include <map>
 #include <memory>
 #include <fstream>
@@ -12,7 +11,7 @@
 
 class Airport {
     const std::string city;
-    std::map<FlightStatus, std::queue<std::shared_ptr<Flight>>> flights;
+    std::vector<std::shared_ptr<Flight>> flights;
     const size_t maximumNumberOfGates;
     std::map<std::shared_ptr<Gate>, std::shared_ptr<Flight>> gates;
     const size_t maximumNumberOfRunways;
@@ -21,29 +20,31 @@ class Airport {
 public:
     Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways);
 
-    void manageFlight(const std::shared_ptr<Flight> &flight);
-    void manageTraffic();
+    std::string manageFlight(int flightNumber);
     std::shared_ptr<Gate> findVacantGate() const;
     std::shared_ptr<Runway> findVacantRunway() const;
 
     size_t loadFlightsFromFile(const std::string &fileName);
-    bool saveFlightsToFile(const std::string &fileName);
+    bool saveFlightsToFile(const std::string &fileName) const;
 
     void addFlight(int flightNumber, FlightStatus status, const std::string &origin, const std::string &destination);
-    void removeFlight(int flightNumber);
     bool addGate(int gateNumber);
     bool addRunway(int runwayNumber);
     bool addConnection(const std::string &connection);
     size_t addConnections(const std::vector<std::string> &listOfCities);
 
-    size_t countVacantGates() const ;
-    size_t countVacantRunways() const ;
-    size_t getNumberOfArrivingFlights() const;
-    size_t getNumberOfDepartingFlights() const;
+    FlightStatus getFlightStatus(int flightNumber) { return findFlight(flightNumber)->getFlightStatus(); };
+
+    size_t countVacantGates() const;
+    size_t countVacantRunways() const;
+
+    size_t getNumberOfFlights() const { return flights.size(); };
     size_t getNumberOfGates() const { return gates.size(); };
     size_t getNumberOfRunways() const { return runways.size(); };
 private:
-    bool hasFlight(int number);
+    std::shared_ptr<Flight> &findFlight(int flightNumber);
+    void removeFlight(std::shared_ptr<Flight> &flight);
+    bool hasFlight(int flightNumber);
     bool hasGate(int gateNumber) const;
     bool hasRunway(int runwayNumber) const;
     bool isArriving(FlightStatus status) const { return status == FlightStatus::ARRIVING || status == FlightStatus::LANDED || status == FlightStatus::DISEMBARKED; };

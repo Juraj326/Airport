@@ -23,7 +23,7 @@ Cities::Cities(const std::vector<std::string>& listOfCities) {
  * @param city Mesto na overenie.
  * @return True ak sa mesto skladá iba z písmen a medzier.
  */
-bool Cities::isValid(const std::string &city) {
+bool Cities::isValid(const std::string &city) const {
     if (city.empty())
         return false;
 

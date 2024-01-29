@@ -29,7 +29,7 @@ priamo pri ich implementáciách.
 ### Flight
 
 Trieda Flight reprezentuje let, ktorý z letiska odlieta alebo naň prilieta. Trieda slúži na poskytovanie informácií o
-lete a simuláciu letu. Trieda Flight má preto šesť atribútov
+lete a simuláciu letu. Trieda Flight má preto štyri atribúty:
 
 - `int number` Identifikátor letu
 - `FlightStatus status` Stav, v ktorom sa let nachádza
@@ -37,14 +37,15 @@ lete a simuláciu letu. Trieda Flight má preto šesť atribútov
 - `std::string destination` Destinácia
 
 Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool board()` až `bool disembark()`)
-a klasické metódy pre OOP ako sú gettery a settery. Všetká dokumentácia k týmto metódam sa potom nachádza pri ich
-definíciách.  
+a klasické metódy pre OOP ako sú gettery a settery.
 Trieda Flight poskytuje jediný konštruktor `explicit Flight(int number, FlightStatus status)`.
+V súbore tejto triedy sú taktiež aj dve metódy pre `enum class FlightStatus`.
+Všetká dokumentácia k týmto metódam sa potom nachádza pri ich definíciách.
 
 ### Infrastructure
 
 Abstraktná trieda Infrastructure predstavuje kľúčovú infraštruktúru letiska, ktorú využívajú lietadlá, ako napríklad
-Gate a Runway. Táto trieda má tri atribúty
+Gate a Runway. Táto trieda má tri atribúty:
 
 - `int number` Identifikátor infraštruktúry
 - `std::shared_ptr<Flight> flight` Let, ktorý aktuálne využíva túto infraštruktúru
@@ -65,8 +66,8 @@ Trieda Gate poskytuje jediný konštruktor `Gate(int number) : Infrastructure(nu
 
 ### Runway
 
-Trieda Runway je druhá z tried, ktoré implementujú abstraktnú triedu Infrastructure. Táto trieda reprezentuje runway na
-letisku. Táto trieda je principiálne rovnaká ako trieda Gate.
+Trieda Runway taktiež implementuje abstraktnú triedu Infrastructure. Táto trieda reprezentuje runway na
+letisku, a je  principiálne rovnaká ako trieda Gate.
 
 ### Airport
 
@@ -74,28 +75,32 @@ Trieda Airport reprezentuje celé letisko. Slúži na spravovanie infraštruktú
 atribútov:
 
 - `const std::string city` Mesto, v ktorom sa nachádza letisko
-- `std::map<FlightStatus, std::queue<std::shared_ptr<Flight>>> flights` Zoznam všetkých letov v tvare `<status, zoznam letov pre status>`
+- `std::vector<std::shared_ptr<Flight>> flights` Zoznam všetkých letov
 - `const size_t maximumNumberOfGates` Najvyšší možný počet gate-ov
-- `std::vector<std::shared_ptr<Gate>> gates` Zoznam všetkých gate-ov
+- `std::map<std::shared_ptr<Gate>, std::shared_ptr<Flight>> gates` Zoznam všetkých gate-ov v tvare `<Gate, Let>`
 - `const size_t maximumNumberOfRunways` Najvyšší možný počet runway-ov
-- `std::vector<std::shared_ptr<Runway>> runways` Zoznam všetkých runway-ov
+- `std::map<std::shared_ptr<Runway>, std::shared_ptr<Flight>> runways` Zoznam všetkých runway-ov v tvare `Gate, Let`
 - `std::shared_ptr<Cities> connections` Množina všetkých letovísk spojených s letiskom
 
 Trieda airport poskytuje jediný konštruktor `Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways)`,
-ktorý vytvorí prázdne letisko bez infraštruktúry a v množine destinácii bude iba mesto `city`, v ktorom sa nachádza toto
-letisko. `maximumNumberOfGates` a `maximumNumberOfRunways` sa nedá po vytvorení letiska už modifikovať. Dokumentácia ku
-všetkým metódam tejto triedy sa nachádza priamo pri ich implementáciách.
+ktorý vytvorí prázdne letisko bez infraštruktúry. Ďalej do množiny destinácii pridá  mesto `city`, v ktorom sa nachádza toto
+letisko a nastaví `maximumNumberOfGates` a `maximumNumberOfRunways`. Tieto dva atribúty sa po vytvorení letiska už nedajú modifikovať.
+Dokumentácia ku všetkým metódam tejto triedy sa nachádza priamo pri ich implementáciách.
 
 ---
 
 ## Zmeny oproti malej verzii projektu
+
+#### Trieda Cities
+
+Trieda cities teraz dokáže uchovávať aj mestá s medzerami.
 
 #### Trieda Flight
 
 Z triedy Flight som presunul atribút `std::shared_ptr<Cities> connections` do triedy Airport, kde dáva väčší zmysel ho
 uchovávať. Ďalej som odstránil atribúty `int gateNumber` a `int runwayNumber`, lebo výrazne zvyšovali komplexitu triedy
 Airport. Odstránil som aj enumerátor `FlightStatus::CREATING` a metódy s ním spojené lebo sa stal nepotrebným a
-taktiež zvyšoval komplexitu triedy Airport.
+taktiež výrazne zvyšoval komplexitu triedy Airport.
 
 ### Zmeny na základe spätnej väzby
 
@@ -132,7 +137,7 @@ const int MAX_FLIGHT_NUMBER = 9999;
 
 // Flight.cpp
 
-Flight::Flight(int number, FlightStatus status) :  status(status), gateNumber(-1), runwayNumber(-1) {
+Flight::Flight(int number, FlightStatus status) :  status(status) {
     if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
         throw std::invalid_argument("Flight number must be an integer ranging from 0 to 9999.");
     ...
