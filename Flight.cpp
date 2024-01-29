@@ -14,46 +14,46 @@ Flight::Flight(int number, FlightStatus status) :  status(status) {
 
 /**
  * Metóda, ktorá simuluje plánovanie letu.
- * @return True ak bol let vo fáze SCHEDULING a letu bol priradený pôvod a destinácia.
+ * @return True ak bol let vo fáze CREATING a letu bol priradený pôvod a destinácia.
  */
 bool Flight::schedule() {
-    if (status != FlightStatus::SCHEDULING || origin.empty() || destination.empty())
+    if (status != FlightStatus::CREATING || origin.empty() || destination.empty())
         return false;
 
-    status = FlightStatus::BOARDING;
+    status = FlightStatus::SCHEDULED;
     return true;
 }
 
 /**
  * Metóda, ktorá simuluje boardovanie letu.
- * @return True ak bol let vo fáze BOARDING.
+ * @return True ak bol let vo fáze SCHEDULED.
  */
 bool Flight::board() {
-    if (status != FlightStatus::BOARDING)
+    if (status != FlightStatus::SCHEDULED)
         return false;
 
-    status = FlightStatus::TAKE_OFF;
+    status = FlightStatus::BOARDED;
     return true;
 }
 
 /**
  * Metóda, ktorá simuluje odlet letu.
- * @return True ak bol let vo fáze BOARDING.
+ * @return True ak bol let vo fáze SCHEDULED.
  */
 bool Flight::take_off() {
-    if (status != FlightStatus::TAKE_OFF)
+    if (status != FlightStatus::BOARDED)
         return false;
 
-    status = FlightStatus::DEPARTING;
+    status = FlightStatus::DEPARTED;
     return true;
 }
 
 /**
  * Metóda, ktorá simuluje oznam o prílete letu.
- * @return True ak bol let vo fáze SCHEDULING a letu bol priradený pôvod a destinácia.
+ * @return True ak bol let vo fáze CREATING a letu bol priradený pôvod a destinácia.
  */
 bool Flight::initiateArrival() {
-    if (status != FlightStatus::SCHEDULING || destination.empty() || origin.empty())
+    if (status != FlightStatus::CREATING || destination.empty() || origin.empty())
         return false;
 
     status = FlightStatus::ARRIVING;
@@ -68,19 +68,19 @@ bool Flight::land() {
     if (status != FlightStatus::ARRIVING)
         return false;
 
-    status = FlightStatus::LANDING;
+    status = FlightStatus::LANDED;
     return true;
 }
 
 /**
  * Metóda, ktorá simuluje koniec letu.
- * @return True ak bol let vo fáze LANDING.
+ * @return True ak bol let vo fáze LANDED.
  */
 bool Flight::disembark() {
-    if (status != FlightStatus::LANDING)
+    if (status != FlightStatus::LANDED)
         return false;
 
-    status = FlightStatus::DISEMBARKING;
+    status = FlightStatus::DISEMBARKED;
     return true;
 }
 
@@ -117,20 +117,20 @@ bool Flight::setDestination(const std::string &destination) {
  */
 std::string flightStatusToString(FlightStatus status) {
     switch (status) {
-        case FlightStatus::BOARDING:
-            return "Boarding";
-        case FlightStatus::TAKE_OFF:
-            return "Taking off";
-        case FlightStatus::DEPARTING:
-            return "Departing";
+        case FlightStatus::SCHEDULED:
+            return "Scheduled";
+        case FlightStatus::BOARDED:
+            return "Boarded";
+        case FlightStatus::DEPARTED:
+            return "Departed";
         case FlightStatus::ARRIVING:
             return "Arriving";
-        case FlightStatus::LANDING:
-            return "Landing";
-        case FlightStatus::DISEMBARKING:
-            return "Disembarking";
+        case FlightStatus::LANDED:
+            return "Landed";
+        case FlightStatus::DISEMBARKED:
+            return "Disembarked";
         default:
-            return "Scheduling";
+            return "Creating";
     }
 }
 
@@ -141,13 +141,13 @@ std::string flightStatusToString(FlightStatus status) {
  */
 FlightStatus stringToFlightStatus(const std::string &status) {
     std::map<std::string, FlightStatus> flightStates = {
-            {"Scheduling", FlightStatus::SCHEDULING},
-            {"Boarding", FlightStatus::BOARDING},
-            {"Taking off", FlightStatus::TAKE_OFF},
-            {"Departing", FlightStatus::DEPARTING},
+            {"Creating", FlightStatus::CREATING},
+            {"Scheduled", FlightStatus::SCHEDULED},
+            {"Boarded", FlightStatus::BOARDED},
+            {"Departed", FlightStatus::DEPARTED},
             {"Arriving", FlightStatus::ARRIVING},
-            {"Landing", FlightStatus::LANDING},
-            {"Disembarking", FlightStatus::DISEMBARKING}
+            {"Landed", FlightStatus::LANDED},
+            {"Disembarked", FlightStatus::DISEMBARKED}
     };
 
     auto flightStatus = flightStates.find(status);

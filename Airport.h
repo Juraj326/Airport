@@ -21,6 +21,7 @@ class Airport {
 public:
     Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways);
 
+    void manageFlight(const std::shared_ptr<Flight> &flight);
     void manageTraffic();
 
     size_t loadFlightsFromFile(const std::string &fileName);
@@ -43,6 +44,6 @@ private:
     bool hasFlight(int number);
     bool hasGate(int gateNumber) const;
     bool hasRunway(int runwayNumber) const;
-    bool isArriving(FlightStatus status) const { return status == FlightStatus::ARRIVING || status == FlightStatus::LANDING || status == FlightStatus::DISEMBARKING; };
-    bool isDeparting(FlightStatus status) const { return status == FlightStatus::BOARDING || status == FlightStatus::TAKE_OFF || status == FlightStatus::DEPARTING; };
+    bool isArriving(FlightStatus status) const { return status == FlightStatus::ARRIVING || status == FlightStatus::LANDED || status == FlightStatus::DISEMBARKED; };
+    bool isDeparting(FlightStatus status) const { return status == FlightStatus::SCHEDULED || status == FlightStatus::BOARDED || status == FlightStatus::DEPARTED; };
 };

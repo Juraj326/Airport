@@ -39,7 +39,7 @@ lete a simuláciu letu. Trieda Flight má preto šesť atribútov
 Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool schedule()` až `bool disembark()`)
 a klasické metódy pre OOP ako sú gettery a settery. Všetká dokumentácia k týmto metódam sa potom nachádza pri ich
 definíciách.  
-Trieda Flight poskytuje jediný konštruktor `explicit Flight(int number, FlightStatus status = FlightStatus::SCHEDULING);`.
+Trieda Flight poskytuje jediný konštruktor `explicit Flight(int number, FlightStatus status = FlightStatus::CREATING);`.
 
 ### Infrastructure
 

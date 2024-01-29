@@ -11,21 +11,9 @@ Airport::Airport(const std::string &city, size_t maximumNumberOfGates, size_t ma
     connections = std::make_shared<Cities>(city);
 
     // Nie je najšťastnejšie riešenie ale nič lepšie mi nenapadlo.
-    for (FlightStatus status : {FlightStatus::SCHEDULING, FlightStatus::BOARDING, FlightStatus::TAKE_OFF, FlightStatus::DEPARTING,
-                                FlightStatus::ARRIVING, FlightStatus::LANDING, FlightStatus::DISEMBARKING})
+    for (FlightStatus status : {FlightStatus::CREATING, FlightStatus::SCHEDULED, FlightStatus::BOARDED, FlightStatus::DEPARTED,
+                                FlightStatus::ARRIVING, FlightStatus::LANDED, FlightStatus::DISEMBARKED})
         flights[status];
-}
-
-/**
- * Metóda, ktorá priraďuje runway-e letom podľa viacerých faktorov:
- * 1. Počet voľných gate-ov (limit 80%)
- * 2. Počet prichádzajúcich letov a počet odchádzajúcich letov
- * 3. Pristávajúce lety majú vyššiu prioritu ako odlietajúce.
- * 4. Poradie letov podľa priority.
- */
-void Airport::manageTraffic() {
-    if (100 * countVacantGates() / getNumberOfGates() < 20)
-        return;
 }
 
 /**
@@ -92,6 +80,43 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
     }
 
     flights.at(status).push(newFlight);
+    manageFlight(newFlight);
+}
+
+/**
+ *
+ * @param flight
+ */
+void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
+    switch (flight->getFlightStatus()) {
+        case FlightStatus::ARRIVING:
+            break; //TODO assignRunway(Flight)
+        case FlightStatus::LANDED:
+            break; //TODO unassignRunway(), assignGate(Flight)
+        case FlightStatus::DISEMBARKED:
+            break; //TODO unassignGate()
+        case FlightStatus::SCHEDULED:
+            break; //TODO assignGate()
+        case FlightStatus::BOARDED:
+            break; //TODO unassignGate(), assignRunway(Flight)
+        case FlightStatus::DEPARTED:
+            break; //TODO unassignRunway()
+        default:
+            return;
+    }
+}
+
+/**
+ * Metóda, ktorá priraďuje runway-e letom podľa viacerých faktorov:
+ * 1. Počet voľných gate-ov (limit 80%)
+ * 2. Počet prichádzajúcich letov a počet odchádzajúcich letov
+ * 3. Pristávajúce lety majú vyššiu prioritu ako odlietajúce.
+ * 4. Poradie letov podľa priority.
+ */
+void Airport::manageTraffic() {
+    std::ostringstream trafficChanges;
+    if (100 * countVacantGates() / getNumberOfGates() < 20)
+        return;
 }
 
 /**
@@ -177,7 +202,7 @@ bool Airport::addGate(int gateNumber) {
     if (getNumberOfGates() == maximumNumberOfGates || hasGate(gateNumber))
         return false;
 
-    std::shared_ptr<Gate> gate =  std::make_shared<Gate>(gateNumber);
+    std::shared_ptr<Gate> gate = std::make_shared<Gate>(gateNumber);
     gates.emplace_back(gate);
     return true;
 }
@@ -278,13 +303,13 @@ bool Airport::hasRunway(int runwayNumber) const {
 size_t Airport::getNumberOfArrivingFlights() const {
     size_t count = 0;
     count += flights.at(FlightStatus::ARRIVING).size();
-    count += flights.at(FlightStatus::LANDING).size();
+    count += flights.at(FlightStatus::LANDED).size();
     return count;
 }
 
 size_t Airport::getNumberOfDepartingFlights() const {
     size_t count = 0;
-    count += flights.at(FlightStatus::BOARDING).size();
-    count += flights.at(FlightStatus::TAKE_OFF).size();
+    count += flights.at(FlightStatus::SCHEDULED).size();
+    count += flights.at(FlightStatus::BOARDED).size();
     return count;
 }
