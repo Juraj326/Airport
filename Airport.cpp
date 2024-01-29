@@ -11,7 +11,7 @@ Airport::Airport(const std::string &city, size_t maximumNumberOfGates, size_t ma
     connections = std::make_shared<Cities>(city);
 
     // Nie je najšťastnejšie riešenie ale nič lepšie mi nenapadlo.
-    for (FlightStatus status : {FlightStatus::CREATING, FlightStatus::SCHEDULED, FlightStatus::BOARDED, FlightStatus::DEPARTED,
+    for (FlightStatus status : {FlightStatus::SCHEDULED, FlightStatus::BOARDED, FlightStatus::DEPARTED,
                                 FlightStatus::ARRIVING, FlightStatus::LANDED, FlightStatus::DISEMBARKED})
         flights[status];
 }
@@ -84,25 +84,23 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
 }
 
 /**
- *
- * @param flight
+ * Metóda, ktorá rozhoduje, čo sa má stať s letom.
+ * @param flight Let, o ktorom sa rozhoduje.
  */
 void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
     switch (flight->getFlightStatus()) {
         case FlightStatus::ARRIVING:
-            break; //TODO assignRunway(Flight)
+            break; //TODO assignRunway(Flight), flight.land()
         case FlightStatus::LANDED:
-            break; //TODO unassignRunway(), assignGate(Flight)
+            break; //TODO unassignRunway(), assignGate(Flight), flight.disembark()
         case FlightStatus::DISEMBARKED:
-            break; //TODO unassignGate()
+            break; //TODO unassignGate(), remove(flight)
         case FlightStatus::SCHEDULED:
-            break; //TODO assignGate()
+            break; //TODO assignGate(), flight.board()
         case FlightStatus::BOARDED:
-            break; //TODO unassignGate(), assignRunway(Flight)
+            break; //TODO unassignGate(), assignRunway(Flight), flight.take_off()
         case FlightStatus::DEPARTED:
-            break; //TODO unassignRunway()
-        default:
-            return;
+            break; //TODO unassignRunway() remove(flight)
     }
 }
 
@@ -115,8 +113,13 @@ void Airport::manageFlight(const std::shared_ptr<Flight> &flight) {
  */
 void Airport::manageTraffic() {
     std::ostringstream trafficChanges;
-    if (100 * countVacantGates() / getNumberOfGates() < 20)
+    if (100 * countVacantGates() / getNumberOfGates() < 20) {
         return;
+    }
+    if (getNumberOfDepartingFlights() > getNumberOfArrivingFlights()) {
+        return;
+    }
+
 }
 
 /**
@@ -300,6 +303,10 @@ bool Airport::hasRunway(int runwayNumber) const {
     return runway != runways.end();
 }
 
+/**
+ * Metóda, ktorá vráti počet letov, ktoré majú letisko ako destináciu
+ * @return Počet letov.
+ */
 size_t Airport::getNumberOfArrivingFlights() const {
     size_t count = 0;
     count += flights.at(FlightStatus::ARRIVING).size();
@@ -307,6 +314,10 @@ size_t Airport::getNumberOfArrivingFlights() const {
     return count;
 }
 
+/**
+ Metóda, ktorá vráti počet letov, ktoré majú letisko ako pôvod
+ * @return Počet letov.
+ */
 size_t Airport::getNumberOfDepartingFlights() const {
     size_t count = 0;
     count += flights.at(FlightStatus::SCHEDULED).size();

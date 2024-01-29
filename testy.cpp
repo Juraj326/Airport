@@ -96,22 +96,21 @@ TEST(Cities, List) {
 TEST(Flight, CislaLetov) {
     std::shared_ptr<Cities> connections;
 
-    ASSERT_THROW({Flight flight(-1234);}, std::invalid_argument);
-    ASSERT_THROW({Flight flight(10000);}, std::invalid_argument);
-    ASSERT_NO_THROW(Flight flight(1234));
-    Flight flight(1234);
+    ASSERT_THROW({Flight flight(-1234, FlightStatus::SCHEDULED);}, std::invalid_argument);
+    ASSERT_THROW({Flight flight(10000, FlightStatus::SCHEDULED);}, std::invalid_argument);
+    ASSERT_NO_THROW(Flight flight(1234, FlightStatus::SCHEDULED));
+    Flight flight(1234, FlightStatus::SCHEDULED);
     ASSERT_EQ(flight.getFlightNumber(), 1234);
-    ASSERT_EQ(flight.getFlightStatus(), FlightStatus::CREATING);
+    ASSERT_EQ(flight.getFlightStatus(), FlightStatus::SCHEDULED);
 }
 
 TEST(Flight, PrichadzajuciLet) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
 
-    Flight flight(1234);
-    ASSERT_TRUE(flight.setOrigin("Bratislava"));
-    ASSERT_TRUE(flight.setDestination("Vienna"));
-    ASSERT_TRUE(flight.initiateArrival());
+    Flight flight(1234, FlightStatus::ARRIVING);
+    ASSERT_TRUE(flight.setOrigin("Vienna"));
+    ASSERT_TRUE(flight.setDestination("Bratislava"));
     ASSERT_TRUE(flight.land());
     ASSERT_TRUE(flight.disembark());
     ASSERT_EQ(flight.getFlightStatus(), FlightStatus::DISEMBARKED);
@@ -121,10 +120,9 @@ TEST(Flight, OdchadzajuciLet) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
 
-    Flight flight(1234);
+    Flight flight(1234, FlightStatus::SCHEDULED);
     ASSERT_TRUE(flight.setOrigin("Bratislava"));
     ASSERT_TRUE(flight.setDestination("Vienna"));
-    ASSERT_TRUE(flight.schedule());
     ASSERT_TRUE(flight.board());
     ASSERT_TRUE(flight.take_off());
     ASSERT_EQ(flight.getFlightStatus(), FlightStatus::DEPARTED);
@@ -134,7 +132,7 @@ TEST(Flight, RovnakyOriginDestination) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
 
-    Flight flight(1234);
+    Flight flight(1234, FlightStatus::SCHEDULED);
     ASSERT_TRUE(flight.setOrigin("Bratislava"));
     ASSERT_FALSE(flight.setDestination("Bratislava"));
     ASSERT_EQ(flight.getOrigin(), "Bratislava");
@@ -148,7 +146,7 @@ TEST(Flight, ZmenaOriginDestination) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
 
-    Flight flight(1234);
+    Flight flight(1234, FlightStatus::SCHEDULED);
     ASSERT_TRUE(flight.setOrigin("Bratislava"));
     ASSERT_TRUE(flight.setDestination("Prague"));
     ASSERT_EQ(flight.getOrigin(), "Bratislava");
@@ -163,14 +161,10 @@ TEST(Flight, Sekvencia) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
 
-    Flight flight(1234);
-    ASSERT_FALSE(flight.schedule());
-    ASSERT_FALSE(flight.initiateArrival());
+    Flight flight(1234, FlightStatus::SCHEDULED);
     flight.setOrigin("Bratislava");
     flight.setDestination("Prague");
-    ASSERT_TRUE(flight.schedule());
     ASSERT_EQ(flight.getFlightStatus(), FlightStatus::SCHEDULED);
-    ASSERT_FALSE(flight.initiateArrival());
     ASSERT_FALSE(flight.take_off());
     ASSERT_FALSE(flight.land());
     ASSERT_TRUE(flight.board());
@@ -183,7 +177,6 @@ TEST(Flight, Sekvencia) {
 }
 
 TEST(Flight, StatusString) {
-    ASSERT_EQ(flightStatusToString(FlightStatus::CREATING), "Creating");
     ASSERT_EQ(flightStatusToString(FlightStatus::SCHEDULED), "Scheduled");
     ASSERT_EQ(flightStatusToString(FlightStatus::BOARDED), "Boarded");
     ASSERT_EQ(flightStatusToString(FlightStatus::DEPARTED), "Departed");
@@ -191,7 +184,6 @@ TEST(Flight, StatusString) {
     ASSERT_EQ(flightStatusToString(FlightStatus::LANDED), "Landed");
     ASSERT_EQ(flightStatusToString(FlightStatus::DISEMBARKED), "Disembarked");
 
-    ASSERT_EQ(stringToFlightStatus("Creating"), FlightStatus::CREATING);
     ASSERT_EQ(stringToFlightStatus("Scheduled"), FlightStatus::SCHEDULED);
     ASSERT_EQ(stringToFlightStatus("Boarded"), FlightStatus::BOARDED);
     ASSERT_EQ(stringToFlightStatus("Departed"), FlightStatus::DEPARTED);
@@ -219,10 +211,9 @@ TEST(Infrastructure , Konstruktor) {
 TEST(Gate, VolnyGate) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
-    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234);
+    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234, FlightStatus::SCHEDULED);
     flight->setOrigin("Bratislava");
     flight->setDestination("Paris");
-    flight->initiateArrival();
     flight->land();
 
     Gate gate(1);
@@ -232,15 +223,14 @@ TEST(Gate, VolnyGate) {
 TEST(Gate, ObsadenyGate) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
-    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234);
+    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234, FlightStatus::SCHEDULED);
     flight->setOrigin("Bratislava");
     flight->setDestination("Paris");
-    flight->schedule();
 
     Gate gate(1);
     gate.assignFlight(flight);
 
-    std::shared_ptr<Flight> flight2 = std::make_shared<Flight>(2);
+    std::shared_ptr<Flight> flight2 = std::make_shared<Flight>(2, FlightStatus::SCHEDULED);
     flight2->setOrigin("Bratislava");
     flight2->setDestination("Prague");
     ASSERT_FALSE(gate.assignFlight(flight2));
@@ -249,10 +239,9 @@ TEST(Gate, ObsadenyGate) {
 TEST(Runway, VolnaRunway) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
-    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234);
+    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234, FlightStatus::SCHEDULED);
     flight->setOrigin("Bratislava");
     flight->setDestination("Paris");
-    flight->initiateArrival();
 
     Runway runway(36);
     ASSERT_TRUE(runway.assignFlight(flight));
@@ -261,16 +250,15 @@ TEST(Runway, VolnaRunway) {
 TEST(Runway, ObsadenaRunway) {
     std::vector<std::string> listOfCities = {"Bratislava", "Vienna", "Budapest", "Prague", "Paris"};
     std::shared_ptr<Cities> connections = std::make_shared<Cities>(listOfCities);
-    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234);
+    std::shared_ptr<Flight> flight = std::make_shared<Flight>(1234, FlightStatus::SCHEDULED);
     flight->setOrigin("Bratislava");
     flight->setDestination("Paris");
-    flight->schedule();
     flight->board();
 
     Runway runway(36);
     runway.assignFlight(flight);
 
-    std::shared_ptr<Flight> flight2 = std::make_shared<Flight>(2);
+    std::shared_ptr<Flight> flight2 = std::make_shared<Flight>(2, FlightStatus::SCHEDULED);
     flight2->setOrigin("Bratislava");
     flight2->setDestination("Prague");
     ASSERT_FALSE(runway.assignFlight(flight2));
@@ -313,8 +301,8 @@ TEST(Airport, AddGateRunway) {
 
 TEST(Airport, AddFlight) {
     Airport airport("Bratislava", 5, 2);
-    ASSERT_THROW(airport.addFlight(1, FlightStatus::CREATING, "Bratislava", "Vienna"), std::invalid_argument);
-    ASSERT_THROW(airport.addFlight(1, FlightStatus::CREATING, "Vienna", "Bratislava"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(1, FlightStatus::SCHEDULED, "Bratislava", "Vienna"), std::invalid_argument);
+    ASSERT_THROW(airport.addFlight(1, FlightStatus::ARRIVING, "Vienna", "Bratislava"), std::invalid_argument);
 
     ASSERT_TRUE(airport.addConnection("New York"));
     ASSERT_TRUE(airport.addConnection("Vienna"));
@@ -322,7 +310,7 @@ TEST(Airport, AddFlight) {
     ASSERT_TRUE(airport.addGate(1));
     ASSERT_TRUE(airport.addRunway(1));
 
-    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::CREATING, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::BOARDED, "Bratislava", "New York"));
 
     ASSERT_THROW(airport.addFlight(5, FlightStatus::DEPARTED, "Bratislava", "Bratislava"), std::invalid_argument);
     ASSERT_THROW(airport.addFlight(5, FlightStatus::DEPARTED, "Vienna", "New York"), std::invalid_argument);
@@ -337,7 +325,7 @@ TEST(Airport, AddFlight) {
     ASSERT_NO_THROW(airport.addFlight(11, FlightStatus::LANDED, "New York", "Bratislava"));
 
     ASSERT_EQ(airport.getNumberOfArrivingFlights(), 2);
-    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 1);
+    ASSERT_EQ(airport.getNumberOfDepartingFlights(), 2);
 
 }
 
@@ -349,7 +337,7 @@ TEST(Airport, Save) {
     ASSERT_TRUE(airport.addGate(10));
     ASSERT_TRUE(airport.addRunway(0));
     ASSERT_TRUE(airport.addRunway(36));
-    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::CREATING, "Bratislava", "New York"));
+    ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::LANDED, "New York", "Bratislava"));
     ASSERT_NO_THROW(airport.addFlight(10, FlightStatus::BOARDED, "Bratislava", "New York"));
     ASSERT_NO_THROW(airport.addFlight(2, FlightStatus::SCHEDULED, "Bratislava", "Vienna"));
     ASSERT_NO_THROW(airport.addFlight(77, FlightStatus::ARRIVING, "New York", "Bratislava"));
@@ -380,8 +368,14 @@ TEST(Airport, LoadNeuspesne) {
     ASSERT_THROW(airport.loadFlightsFromFile("Flights2.txt"), std::invalid_argument);
 }
 
-TEST(Airport, Krok) {
-    Airport airport("Bratislava", 5, 2);
+TEST(Airport, ManageFlight) {
+    Airport airport("Bratislava", 10, 2);
+    for (int i = 0; i < 10; i++)
+        ASSERT_TRUE(airport.addGate(i * 3));
+    ASSERT_TRUE(airport.addRunway(11));
+    ASSERT_TRUE(airport.addRunway(25));
+    for (std::string city : {"New York", "Vienna", "Prague", "Budapest", "Shanghai", "San Francisco", "Paris", "Berlin"})
+        ASSERT_TRUE(airport.addConnection(city));
 
 }
 

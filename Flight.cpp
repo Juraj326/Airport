@@ -13,18 +13,6 @@ Flight::Flight(int number, FlightStatus status) :  status(status) {
 }
 
 /**
- * Metóda, ktorá simuluje plánovanie letu.
- * @return True ak bol let vo fáze CREATING a letu bol priradený pôvod a destinácia.
- */
-bool Flight::schedule() {
-    if (status != FlightStatus::CREATING || origin.empty() || destination.empty())
-        return false;
-
-    status = FlightStatus::SCHEDULED;
-    return true;
-}
-
-/**
  * Metóda, ktorá simuluje boardovanie letu.
  * @return True ak bol let vo fáze SCHEDULED.
  */
@@ -45,18 +33,6 @@ bool Flight::take_off() {
         return false;
 
     status = FlightStatus::DEPARTED;
-    return true;
-}
-
-/**
- * Metóda, ktorá simuluje oznam o prílete letu.
- * @return True ak bol let vo fáze CREATING a letu bol priradený pôvod a destinácia.
- */
-bool Flight::initiateArrival() {
-    if (status != FlightStatus::CREATING || destination.empty() || origin.empty())
-        return false;
-
-    status = FlightStatus::ARRIVING;
     return true;
 }
 
@@ -129,8 +105,6 @@ std::string flightStatusToString(FlightStatus status) {
             return "Landed";
         case FlightStatus::DISEMBARKED:
             return "Disembarked";
-        default:
-            return "Creating";
     }
 }
 
@@ -141,7 +115,6 @@ std::string flightStatusToString(FlightStatus status) {
  */
 FlightStatus stringToFlightStatus(const std::string &status) {
     std::map<std::string, FlightStatus> flightStates = {
-            {"Creating", FlightStatus::CREATING},
             {"Scheduled", FlightStatus::SCHEDULED},
             {"Boarded", FlightStatus::BOARDED},
             {"Departed", FlightStatus::DEPARTED},
