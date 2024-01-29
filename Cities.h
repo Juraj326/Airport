@@ -7,8 +7,6 @@
 
 class Cities {
     std::set<std::string> cities;
-
-    bool isValid(const std::string &city);
 public:
     Cities() = default;;
     explicit Cities(const std::string &city);
@@ -22,4 +20,6 @@ public:
     bool isEmpty() const;
     size_t size() const;
     std::string getListOfCities() const;
+private:
+    bool isValid(const std::string &city);
 };

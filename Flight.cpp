@@ -32,7 +32,7 @@ bool Flight::board() {
     if (status != FlightStatus::BOARDING)
         return false;
 
-    status = FlightStatus::TAKING_OFF;
+    status = FlightStatus::TAKE_OFF;
     return true;
 }
 
@@ -41,7 +41,7 @@ bool Flight::board() {
  * @return True ak bol let vo fáze BOARDING.
  */
 bool Flight::take_off() {
-    if (status != FlightStatus::TAKING_OFF)
+    if (status != FlightStatus::TAKE_OFF)
         return false;
 
     status = FlightStatus::DEPARTING;
@@ -111,15 +111,6 @@ bool Flight::setDestination(const std::string &destination) {
 }
 
 /**
- * Porovnávanie podľa priority fázy letu. Priorita je podľa poradia definície fáz letu.
- * @param flight2 Let, s ktorým sa porovnáva priorita.
- * @return True ak má flight (this) nižšiu prioritu ako flight2.
- */
-bool Flight::operator<(const Flight &flight2) const {
-    return status < flight2.status;
-}
-
-/**
  * Metóda, ktorá vracia stringovú reprezentáciu fázy letu.
  * @param status Fáza letu.
  * @return Stringová reprezentácia fázy letu.
@@ -128,7 +119,7 @@ std::string flightStatusToString(FlightStatus status) {
     switch (status) {
         case FlightStatus::BOARDING:
             return "Boarding";
-        case FlightStatus::TAKING_OFF:
+        case FlightStatus::TAKE_OFF:
             return "Taking off";
         case FlightStatus::DEPARTING:
             return "Departing";
@@ -152,7 +143,7 @@ FlightStatus stringToFlightStatus(const std::string &status) {
     std::map<std::string, FlightStatus> flightStates = {
             {"Scheduling", FlightStatus::SCHEDULING},
             {"Boarding", FlightStatus::BOARDING},
-            {"Taking off", FlightStatus::TAKING_OFF},
+            {"Taking off", FlightStatus::TAKE_OFF},
             {"Departing", FlightStatus::DEPARTING},
             {"Arriving", FlightStatus::ARRIVING},
             {"Landing", FlightStatus::LANDING},

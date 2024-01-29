@@ -9,6 +9,11 @@
 Airport::Airport(const std::string &city, size_t maximumNumberOfGates, size_t maximumNumberOfRunways) :
     city(city), maximumNumberOfGates(maximumNumberOfGates), maximumNumberOfRunways(maximumNumberOfRunways) {
     connections = std::make_shared<Cities>(city);
+
+    // Nie je najšťastnejšie riešenie ale nič lepšie mi nenapadlo.
+    for (FlightStatus status : {FlightStatus::SCHEDULING, FlightStatus::BOARDING, FlightStatus::TAKE_OFF, FlightStatus::DEPARTING,
+                                FlightStatus::ARRIVING, FlightStatus::LANDING, FlightStatus::DISEMBARKING})
+        flights[status];
 }
 
 /**
@@ -74,11 +79,7 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
         throw std::invalid_argument(errorMsg.str());
     }
 
-    flights.emplace_back(newFlight);
-    if (isArriving(status))
-        arrivingFlights.push(newFlight);
-    if (isDeparting(status))
-        departingFlights.push(newFlight);
+    flights.at(status).push(newFlight);
 }
 
 /**
@@ -136,11 +137,19 @@ bool Airport::saveFlightsToFile(const std::string &fileName) {
     if (!outputFile.is_open())
         return false;
 
-    for (const std::shared_ptr<Flight> &flight : flights) {
-        outputFile << flight->getFlightNumber() << ";";
-        outputFile << flightStatusToString(flight->getFlightStatus()) << ";";
-        outputFile << flight->getOrigin() << ";";
-        outputFile << flight->getDestination() << "\n";
+    for (auto &statusQueue : flights) {
+        std::queue<std::shared_ptr<Flight>> tmpQueue;
+        while (!statusQueue.second.empty()) {
+            std::shared_ptr<Flight> flight = statusQueue.second.front();
+            statusQueue.second.pop();
+            outputFile << flight->getFlightNumber() << ";";
+            outputFile << flightStatusToString(flight->getFlightStatus()) << ";";
+            outputFile << flight->getOrigin() << ";";
+            outputFile << flight->getDestination() << "\n";
+
+            tmpQueue.push(flight);
+        }
+        statusQueue.second = tmpQueue;
     }
 
     outputFile.close();
@@ -214,9 +223,24 @@ size_t Airport::countVacantRunways() const {
  * @param number Číslo letu.
  * @return True ak s letiskom interaguje let s číslom number.
  */
-bool Airport::hasFlight(int number) const {
-    auto flight = std::find_if(flights.begin(), flights.end(), [number] (const std::shared_ptr<Flight> &flight) { return flight->getFlightNumber() == number; });
-    return flight != flights.end();
+bool Airport::hasFlight(int number) {
+    for (auto &statusQueue : flights) {
+        std::queue<std::shared_ptr<Flight>> tmpQueue;
+        while (!statusQueue.second.empty()) {
+            std::shared_ptr<Flight> flight = statusQueue.second.front();
+            statusQueue.second.pop();
+
+            if (flight->getFlightNumber() == number) {
+                tmpQueue.push(flight);
+                statusQueue.second = tmpQueue;
+                return true;
+            }
+
+            tmpQueue.push(flight);
+        }
+        statusQueue.second = tmpQueue;
+    }
+    return false;
 }
 
 /**
@@ -237,4 +261,18 @@ bool Airport::hasGate(int gateNumber) const {
 bool Airport::hasRunway(int runwayNumber) const {
     auto runway = std::find_if(runways.begin(), runways.end(), [runwayNumber] (const std::shared_ptr<Runway> &runway) { return runway->getNumber() == runwayNumber; });
     return runway != runways.end();
+}
+
+size_t Airport::getNumberOfArrivingFlights() const {
+    size_t count = 0;
+    count += flights.at(FlightStatus::ARRIVING).size();
+    count += flights.at(FlightStatus::LANDING).size();
+    return count;
+}
+
+size_t Airport::getNumberOfDepartingFlights() const {
+    size_t count = 0;
+    count += flights.at(FlightStatus::BOARDING).size();
+    count += flights.at(FlightStatus::TAKE_OFF).size();
+    return count;
 }

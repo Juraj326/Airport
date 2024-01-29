@@ -19,7 +19,7 @@ enum class FlightStatus {
     ARRIVING,   // prvý kontakt s prichádzajúcim letom
     DEPARTING,  // koniec odchádzajúceho letu
     DISEMBARKING,   // koniec prichádzajúceho letu
-    TAKING_OFF, // let je pripravený odletieť
+    TAKE_OFF, // let je pripravený odletieť
     LANDING // let je pripravený pristáť, najvyššia priorita
 };
 
@@ -49,6 +49,4 @@ public:
     FlightStatus getFlightStatus() const { return status; };
     const std::string &getOrigin() const { return origin; };
     const std::string &getDestination() const { return destination; };
-
-    bool operator <(const Flight &flight2) const;
 };

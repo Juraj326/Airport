@@ -74,9 +74,7 @@ Trieda Airport reprezentuje celé letisko. Slúži na spravovanie infraštruktú
 atribútov:
 
 - `const std::string city` Mesto, v ktorom sa nachádza letisko
-- `std::vector<std::shared_ptr<Flight>> flights` Zoznam všetkých letov, ktoré interagujú s letiskom
-- `std::priority_queue<std::shared_ptr<Flight>> arrivingFlights` Zoznam prilietajúcich letov
-- `std::priority_queue<std::shared_ptr<Flight>> departingFlights` Zoznam odchádzajúcich letov
+- `std::map<FlightStatus, std::queue<std::shared_ptr<Flight>>> flights` Zoznam všetkých letov v tvare `<status, zoznam letov pre status>`
 - `const size_t maximumNumberOfGates` Najvyšší možný počet gate-ov
 - `std::vector<std::shared_ptr<Gate>> gates` Zoznam všetkých gate-ov
 - `const size_t maximumNumberOfRunways` Najvyšší možný počet runway-ov

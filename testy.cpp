@@ -174,7 +174,7 @@ TEST(Flight, Sekvencia) {
     ASSERT_FALSE(flight.take_off());
     ASSERT_FALSE(flight.land());
     ASSERT_TRUE(flight.board());
-    ASSERT_EQ(flight.getFlightStatus(), FlightStatus::TAKING_OFF);
+    ASSERT_EQ(flight.getFlightStatus(), FlightStatus::TAKE_OFF);
     ASSERT_TRUE(flight.take_off());
 
     ASSERT_EQ(flight.getOrigin(), "Bratislava");
@@ -185,7 +185,7 @@ TEST(Flight, Sekvencia) {
 TEST(Flight, StatusString) {
     ASSERT_EQ(flightStatusToString(FlightStatus::SCHEDULING), "Scheduling");
     ASSERT_EQ(flightStatusToString(FlightStatus::BOARDING), "Boarding");
-    ASSERT_EQ(flightStatusToString(FlightStatus::TAKING_OFF), "Taking off");
+    ASSERT_EQ(flightStatusToString(FlightStatus::TAKE_OFF), "Taking off");
     ASSERT_EQ(flightStatusToString(FlightStatus::DEPARTING), "Departing");
     ASSERT_EQ(flightStatusToString(FlightStatus::ARRIVING), "Arriving");
     ASSERT_EQ(flightStatusToString(FlightStatus::LANDING), "Landing");
@@ -193,43 +193,11 @@ TEST(Flight, StatusString) {
 
     ASSERT_EQ(stringToFlightStatus("Scheduling"), FlightStatus::SCHEDULING);
     ASSERT_EQ(stringToFlightStatus("Boarding"), FlightStatus::BOARDING);
-    ASSERT_EQ(stringToFlightStatus("Taking off"), FlightStatus::TAKING_OFF);
+    ASSERT_EQ(stringToFlightStatus("Taking off"), FlightStatus::TAKE_OFF);
     ASSERT_EQ(stringToFlightStatus("Departing"), FlightStatus::DEPARTING);
     ASSERT_EQ(stringToFlightStatus("Arriving"), FlightStatus::ARRIVING);
     ASSERT_EQ(stringToFlightStatus("Landing"), FlightStatus::LANDING);
     ASSERT_EQ(stringToFlightStatus("Disembarking"), FlightStatus::DISEMBARKING);
-}
-
-TEST(Flight, PorovnaniePrichadzajucich) {
-    Flight flight0(0, FlightStatus::BOARDING);
-    Flight flight1(1, FlightStatus::TAKING_OFF);
-    Flight flight2(2, FlightStatus::DEPARTING);
-    ASSERT_TRUE(flight0 < flight1);
-    ASSERT_TRUE(flight0 < flight2);
-    ASSERT_FALSE(flight1 < flight2);
-}
-
-TEST(Flight, PorovnaniePrichadzajucieOdchadzajuce) {
-    Flight flight0(0);
-    Flight flight1(1, FlightStatus::BOARDING);
-    Flight flight2(2, FlightStatus::TAKING_OFF);
-    Flight flight3(3, FlightStatus::DEPARTING);
-    Flight flight4(4, FlightStatus::ARRIVING);
-    Flight flight5(5, FlightStatus::LANDING);
-    Flight flight6(6, FlightStatus::DISEMBARKING);
-
-    std::set<Flight> flights = {flight0, flight1, flight2, flight3, flight4, flight5, flight6};
-    ASSERT_TRUE(flight0 < flight1);
-    ASSERT_TRUE(flight0 < flight2);
-    ASSERT_TRUE(flight0 < flight5);
-    ASSERT_TRUE(flight0 < flight6);
-
-    ASSERT_FALSE(flight5 < flight0);
-    ASSERT_FALSE(flight5 < flight1);
-    ASSERT_FALSE(flight5 < flight2);
-    ASSERT_FALSE(flight5 < flight3);
-    ASSERT_FALSE(flight5 < flight4);
-    ASSERT_FALSE(flight5 < flight6);
 }
 
 TEST(Infrastructure , Konstruktor) {
@@ -395,7 +363,7 @@ TEST(Airport, Save) {
     ASSERT_TRUE(airport.addRunway(0));
     ASSERT_TRUE(airport.addRunway(36));
     ASSERT_NO_THROW(airport.addFlight(1, FlightStatus::SCHEDULING, "Bratislava", "New York"));
-    ASSERT_NO_THROW(airport.addFlight(10, FlightStatus::TAKING_OFF, "New York", "Bratislava"));
+    ASSERT_NO_THROW(airport.addFlight(10, FlightStatus::TAKE_OFF, "New York", "Bratislava"));
     ASSERT_NO_THROW(airport.addFlight(2, FlightStatus::BOARDING, "Bratislava", "Vienna"));
     ASSERT_TRUE(airport.saveFlightsToFile("Flights1.txt"));
 }
