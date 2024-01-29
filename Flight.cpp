@@ -5,7 +5,7 @@
  * @param number Číslo letu.
  * @param status Fáza letu.
  */
-Flight::Flight(int number, FlightStatus status) :  status(status), gateNumber(UNASSIGNED), runwayNumber(UNASSIGNED) {
+Flight::Flight(int number, FlightStatus status) :  status(status) {
     if (number < MIN_FLIGHT_NUMBER || number > MAX_FLIGHT_NUMBER)
         throw std::invalid_argument("Flight number must be an integer ranging from 0 to 9999.");
 
@@ -29,7 +29,7 @@ bool Flight::schedule() {
  * @return True ak je let naplánovaný a bol mu priradený gate.
  */
 bool Flight::board() {
-    if (status != FlightStatus::BOARDING || !hasAssignedGate())
+    if (status != FlightStatus::BOARDING)
         return false;
 
     status = FlightStatus::TAKING_OFF;
@@ -41,7 +41,7 @@ bool Flight::board() {
  * @return True ak je let vo fáze boardovania a bola mu priradená runway.
  */
 bool Flight::depart() {
-    if (status != FlightStatus::TAKING_OFF || !hasAssignedRunway())
+    if (status != FlightStatus::TAKING_OFF)
         return false;
 
     status = FlightStatus::DEPARTING;
@@ -65,7 +65,7 @@ bool Flight::initiateArrival() {
  * @return True ak let prichádza a má priradenú runway.
  */
 bool Flight::land() {
-    if (status != FlightStatus::ARRIVING || !hasAssignedRunway())
+    if (status != FlightStatus::ARRIVING)
         return false;
 
     status = FlightStatus::LANDING;
@@ -77,7 +77,7 @@ bool Flight::land() {
  * @return True ak let pristál a má priradený gate.
  */
 bool Flight::disembark() {
-    if (status != FlightStatus::LANDING || !hasAssignedGate())
+    if (status != FlightStatus::LANDING)
         return false;
 
     status = FlightStatus::DISEMBARKING;

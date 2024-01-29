@@ -10,7 +10,6 @@ bool Gate::assignFlight(std::shared_ptr<Flight> flight) {
         return false;
 
     this->flight = flight;
-    this->flight->assignGate(number);
     status = Status::OCCUPIED;
     return true;
 }

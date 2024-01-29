@@ -34,7 +34,7 @@ public:
     size_t loadFlightsFromFile(const std::string &fileName);
     bool saveFlightsToFile(const std::string &fileName);
 
-    void addFlight(int number, FlightStatus status, const std::string &origin, const std::string &destination, int gateNumber = UNASSIGNED, int runwayNumber = UNASSIGNED);
+    void addFlight(int number, FlightStatus status, const std::string &origin, const std::string &destination);
     bool addGate(int gateNumber);
     bool addRunway(int runwayNumber);
     bool addConnection(const std::string &connection);

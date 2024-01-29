@@ -34,7 +34,7 @@ int Airport::manageTraffic() {
  * @param gateNumber Gate, ktorý je priradený letu.
  * @param runwayNumber Runway, ktorá je priradená letu.
  */
-void Airport::addFlight(int number, FlightStatus status, const std::string &origin, const std::string &destination, int gateNumber, int runwayNumber) {
+void Airport::addFlight(int number, FlightStatus status, const std::string &origin, const std::string &destination) {
     if (countVacantGates() == 0 && isDeparting(status)) {
         std::ostringstream errorMsg;
         errorMsg << "Flight " << number << " cannot be added because all the gates are full.";
@@ -75,22 +75,6 @@ void Airport::addFlight(int number, FlightStatus status, const std::string &orig
         errorMsg << "Unable to set destination for flight " << number << ".";
         throw std::invalid_argument(errorMsg.str());
     }
-    if (gateNumber != UNASSIGNED) {
-        if (!hasGate(gateNumber)) {
-            std::ostringstream errorMsg;
-            errorMsg << "The flight " << number << " has been assigned a gate that does not exist (" << gateNumber << ").";
-            throw std::invalid_argument(errorMsg.str());
-        }
-        newFlight->assignGate(gateNumber);
-    }
-    if (runwayNumber != UNASSIGNED) {
-        if (!hasRunway(runwayNumber)) {
-            std::ostringstream errorMsg;
-            errorMsg << "The flight " << number << " has been assigned a runway that does not exist (" << runwayNumber << ").";
-            throw std::invalid_argument(errorMsg.str());
-        }
-        newFlight->assignRunway(runwayNumber);
-    }
 
     flights.emplace_back(newFlight);
     if (isArriving(status))
@@ -118,15 +102,11 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
         std::string status;
         std::string origin;
         std::string destination;
-        std::string gateNumber;
-        std::string runwayNumber;
 
         std::getline(flightStream, number, ';');
         std::getline(flightStream, status, ';');
         std::getline(flightStream, origin, ';');
-        std::getline(flightStream, destination, ';');
-        std::getline(flightStream, gateNumber, ';');
-        std::getline(flightStream, runwayNumber, ';');
+        std::getline(flightStream, destination, '\n');
 
         std::map<std::string, FlightStatus> flightStates = {
                 {"Scheduling", FlightStatus::SCHEDULING},
@@ -146,7 +126,7 @@ size_t Airport::loadFlightsFromFile(const std::string &fileName) {
         }
 
         try {
-            addFlight(std::stoi(number), flightStatus->second, origin, destination, std::stoi(gateNumber), std::stoi(runwayNumber));
+            addFlight(std::stoi(number), flightStatus->second, origin, destination);
         } catch (const std::invalid_argument &e) {
             std::ostringstream errorMsg;
             errorMsg << "Unable to load flight " << number << " from file " << fileName << ".";
@@ -178,9 +158,7 @@ bool Airport::saveFlightsToFile(const std::string &fileName) {
         outputFile << flight->getFlightNumber() << ";";
         outputFile << flight->getFlightStatusString() << ";";
         outputFile << flight->getOrigin() << ";";
-        outputFile << flight->getDestination() << ";";
-        outputFile << flight->getDesignatedGate() << ";";
-        outputFile << flight->getDesignatedRunway() << "\n";
+        outputFile << flight->getDestination() << "\n";
     }
 
     outputFile.close();

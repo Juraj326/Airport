@@ -10,7 +10,6 @@ bool Runway::assignFlight(std::shared_ptr<Flight> flight) {
         return false;
 
     this->flight = flight;
-    this->flight->assignRunway(number);
     status = Status::OCCUPIED;
     return true;
 }

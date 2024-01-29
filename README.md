@@ -35,8 +35,6 @@ lete a simuláciu letu. Trieda Flight má preto šesť atribútov
 - `FlightStatus status` Stav, v ktorom sa let nachádza
 - `std::string origin` Miesto odletu
 - `std::string destination` Destinácia
-- `int gateNumber` Identifikátor prideleného gate-u
-- `int runwayNumber` Identifikátor pridelenej runway
 
 Okrem týchto atribútov obsahuje trieda Flight metódy na simulovanie letu (metódy `bool schedule()` až `bool disembark()`)
 a klasické metódy pre OOP ako sú gettery a settery. Všetká dokumentácia k týmto metódam sa potom nachádza pri ich
@@ -92,7 +90,15 @@ všetkým metódam tejto triedy sa nachádza priamo pri ich implementáciách.
 
 ---
 
-## Zmeny na základe spätnej väzby
+## Zmeny oproti malej verzii projektu
+
+#### Trieda Flight
+
+Z triedy Flight som presunul atribút `std::shared_ptr<Cities> connections` do triedy Airport, kde dáva väčší zmysel ho
+uchovávať. Ďalej som odstránil atribúty `int gateNumber` a `int runwayNumber`, lebo sa stali nepotrebnými a výrazne
+zvyšovali komplexitu triedy Airport.
+
+### Zmeny na základe spätnej väzby
 
 Na základe spätnej väzby z malej verzie projektu som
 - Definoval všetky číselné konštanty spolu na jednom mieste pre danú triedu.
